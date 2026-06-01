@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Send, CheckCircle, Terminal, MessageCircle, Loader } from 'lucide-react';
-import { sendOrderEmail, openWhatsApp, buildOrderWAMessage } from '../config/emailjs';
+import { sendOrderEmail, openWhatsApp, buildOrderWAMessage, WA_NUMBER } from '../config/emailjs';
 import GlitchText from './motion/GlitchText';
 import ScrollReveal from './motion/ScrollReveal';
 import MagneticCard from './motion/MagneticCard';
@@ -17,29 +17,40 @@ const OrderForm = () => {
   const [formData, setFormData] = useState(INITIAL);
   const [status, setStatus] = useState('idle'); // idle | loading | success | error
   const [pulseActive, setPulseActive] = useState(false);
+  const [waUrl, setWaUrl] = useState('');
 
   const set = (key) => (e) => setFormData(prev => ({ ...prev, [key]: e.target.value }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (status === 'success') return;
     setStatus('loading');
 
     try {
       // 1. Send email via EmailJS
       await sendOrderEmail(formData);
 
-      // 2. Trigger success UI
+      // 2. Build WhatsApp message and URL
+      const waMsg = buildOrderWAMessage(formData);
+      const encoded = encodeURIComponent(waMsg);
+      const url = `https://wa.me/${WA_NUMBER}?text=${encoded}`;
+      setWaUrl(url);
+
+      // 3. Trigger success UI
       setStatus('success');
       setPulseActive(true);
       setTimeout(() => setPulseActive(false), 1500);
 
-      // 3. Auto-open WhatsApp after brief delay (so user sees success first)
+      // 4. Auto-open WhatsApp after brief delay (so user sees success first)
       setTimeout(() => {
-        openWhatsApp(buildOrderWAMessage(formData));
+        openWhatsApp(waMsg);
       }, 800);
 
       setFormData(INITIAL);
-      setTimeout(() => setStatus('idle'), 7000);
+      setTimeout(() => {
+        setStatus('idle');
+        setWaUrl('');
+      }, 10000); // Keep success state and WhatsApp link active for 10 seconds
     } catch (err) {
       console.error('EmailJS error:', err);
       setStatus('error');
@@ -52,7 +63,7 @@ const OrderForm = () => {
     background: 'rgba(0,0,0,0.4)',
     border: '1px solid rgba(99,102,241,0.3)',
     borderRadius: '10px', color: '#e0e7ff', outline: 'none',
-    fontFamily: "'Courier New', monospace", fontSize: '0.9rem',
+    fontFamily: "'Courier New', monospace", fontSize: '16px',
     transition: 'border-color 0.3s ease, box-shadow 0.3s ease',
     boxSizing: 'border-box',
   };
@@ -160,10 +171,9 @@ const OrderForm = () => {
 
         {/* ── Right: Form ── */}
         <ScrollReveal direction="right">
-          <form onSubmit={handleSubmit} style={{
+          <form onSubmit={handleSubmit} className="order-form-el" style={{
             background: 'rgba(3,7,18,0.88)', backdropFilter: 'blur(24px)',
-            border: '1px solid rgba(99,102,241,0.25)', borderRadius: '28px',
-            padding: '32px 28px', position: 'relative', overflow: 'hidden',
+            border: '1px solid rgba(99,102,241,0.25)', position: 'relative', overflow: 'hidden',
           }}>
             {/* Terminal bar */}
             <div style={{
@@ -221,40 +231,61 @@ const OrderForm = () => {
                 style={{ ...inputStyle, resize: 'none' }} className="terminal-input" />
             </div>
 
-            {/* Submit button */}
+            {/* Submit button / WhatsApp Link Fallback */}
             <MagneticCard
               tiltStrength={5}
               scaleHover={1.02}
               zDepth={8}
-              glowColor="#6366f1"
-              data-cursor-color="#6366f1"
+              glowColor={status === 'success' ? '#25d366' : '#6366f1'}
+              data-cursor-color={status === 'success' ? '#25d366' : '#6366f1'}
               style={{ width: '100%', display: 'block' }}
             >
-              <button type="submit" disabled={status === 'loading'} className="launch-btn" style={{
-                width: '100%', padding: '16px',
-                background: status === 'success'
-                  ? 'linear-gradient(135deg, #06ffa5, #25d366)'
-                  : status === 'error'
-                  ? 'linear-gradient(135deg, #ff006e, #ff4444)'
-                  : 'linear-gradient(135deg, #6366f1, #a855f7)',
-                borderRadius: '12px', fontWeight: '700', fontSize: '1rem',
-                color: status === 'success' ? '#000' : 'white',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-                transition: 'all 0.3s ease',
-                boxShadow: status === 'loading' ? 'none' : '0 8px 30px rgba(99,102,241,0.45)',
-                opacity: status === 'loading' ? 0.8 : 1,
-                cursor: status === 'loading' ? 'not-allowed' : 'pointer',
-              }}>
-                {status === 'loading' && <Loader size={18} style={{ animation: 'spin 1s linear infinite' }} />}
-                {status === 'success' && <MessageCircle size={18} />}
-                {status !== 'loading' && status !== 'success' && <Send size={18} />}
-                <span>
-                  {status === 'loading' ? 'Transmitting...'
-                    : status === 'success' ? '✓ Sent! WhatsApp opening...'
-                    : status === 'error' ? '✗ Failed — Try Again'
-                    : 'Launch Mission'}
-                </span>
-              </button>
+              {status === 'success' ? (
+                <a
+                  href={waUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="launch-btn"
+                  style={{
+                    width: '100%', padding: '16px',
+                    background: 'linear-gradient(135deg, #06ffa5, #25d366)',
+                    borderRadius: '12px', fontWeight: '700', fontSize: '1rem',
+                    color: '#000',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+                    transition: 'all 0.3s ease',
+                    boxShadow: '0 8px 30px rgba(37,211,102,0.4)',
+                    textDecoration: 'none',
+                    boxSizing: 'border-box',
+                  }}
+                >
+                  <MessageCircle size={18} />
+                  <span>Open WhatsApp Chat</span>
+                </a>
+              ) : (
+                <button type="submit" disabled={status === 'loading'} className="launch-btn" style={{
+                  width: '100%', padding: '16px',
+                  background: status === 'error'
+                    ? 'linear-gradient(135deg, #ff006e, #ff4444)'
+                    : 'linear-gradient(135deg, #6366f1, #a855f7)',
+                  borderRadius: '12px', fontWeight: '700', fontSize: '1rem',
+                  color: 'white',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+                  transition: 'all 0.3s ease',
+                  boxShadow: status === 'loading' ? 'none' : '0 8px 30px rgba(99,102,241,0.45)',
+                  opacity: status === 'loading' ? 0.8 : 1,
+                  cursor: status === 'loading' ? 'not-allowed' : 'pointer',
+                  border: 'none',
+                }}>
+                  {status === 'loading' && <Loader size={18} style={{ animation: 'spin 1s linear infinite' }} />}
+                  {status === 'error' && <Send size={18} />}
+                  {status === 'idle' && <Send size={18} />}
+                  <span>
+                    {status === 'loading' ? 'Transmitting...'
+                      : status === 'error' ? '✗ Failed — Try Again'
+                      : 'Launch Mission'}
+                  </span>
+                </button>
+              )}
             </MagneticCard>
 
             {/* Success note */}
@@ -267,7 +298,7 @@ const OrderForm = () => {
                 animation: 'fadeInUp 0.3s ease',
               }}>
                 <MessageCircle size={15} />
-                WhatsApp is opening with your order details — just tap Send!
+                WhatsApp is opening! If it didn't open automatically, tap the button above.
               </div>
             )}
 
@@ -294,6 +325,10 @@ const OrderForm = () => {
       </div>
 
       <style>{`
+        .order-form-el {
+          padding: 32px 28px;
+          border-radius: 28px;
+        }
         .terminal-input:focus {
           border-color: rgba(99,102,241,0.7) !important;
           box-shadow: 0 0 20px rgba(99,102,241,0.2) !important;
@@ -324,6 +359,12 @@ const OrderForm = () => {
         }
         @media (max-width: 520px) {
           .form-row { grid-template-columns: 1fr !important; }
+        }
+        @media (max-width: 480px) {
+          .order-form-el {
+            padding: 24px 16px !important;
+            border-radius: 20px !important;
+          }
         }
       `}</style>
     </section>

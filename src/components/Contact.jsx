@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Mail, Phone, MapPin, Send, Zap, MessageCircle, Loader } from 'lucide-react';
-import { sendContactEmail, openWhatsApp, buildContactWAMessage } from '../config/emailjs';
+import { sendContactEmail, openWhatsApp, buildContactWAMessage, WA_NUMBER } from '../config/emailjs';
 import ScrollReveal from './motion/ScrollReveal';
 import MagneticCard from './motion/MagneticCard';
 
@@ -9,27 +9,38 @@ const INITIAL = { name: '', email: '', phone: '', subject: '', message: '' };
 const Contact = () => {
   const [formData, setFormData] = useState(INITIAL);
   const [status, setStatus] = useState('idle'); // idle | loading | success | error
+  const [waUrl, setWaUrl] = useState('');
 
   const set = (key) => (e) => setFormData(prev => ({ ...prev, [key]: e.target.value }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (status === 'success') return;
     setStatus('loading');
 
     try {
       // 1. Send email via EmailJS
       await sendContactEmail(formData);
 
-      // 2. Success
+      // 2. Build WhatsApp message and URL
+      const waMsg = buildContactWAMessage(formData);
+      const encoded = encodeURIComponent(waMsg);
+      const url = `https://wa.me/${WA_NUMBER}?text=${encoded}`;
+      setWaUrl(url);
+
+      // 3. Success UI
       setStatus('success');
 
-      // 3. Open WhatsApp after brief delay
+      // 4. Open WhatsApp after brief delay
       setTimeout(() => {
-        openWhatsApp(buildContactWAMessage(formData));
+        openWhatsApp(waMsg);
       }, 800);
 
       setFormData(INITIAL);
-      setTimeout(() => setStatus('idle'), 7000);
+      setTimeout(() => {
+        setStatus('idle');
+        setWaUrl('');
+      }, 10000); // Keep success state and WhatsApp link active for 10 seconds
     } catch (err) {
       console.error('EmailJS error:', err);
       setStatus('error');
@@ -49,7 +60,7 @@ const Contact = () => {
     background: 'rgba(0,0,0,0.4)',
     border: '1px solid rgba(0, 212, 255, 0.3)',
     borderRadius: '10px', color: '#e0f7ff', outline: 'none',
-    fontFamily: "'Courier New', monospace", fontSize: '0.9rem',
+    fontFamily: "'Courier New', monospace", fontSize: '16px',
     transition: 'border-color 0.3s ease, box-shadow 0.3s ease',
     boxSizing: 'border-box',
   };
@@ -172,8 +183,7 @@ const Contact = () => {
 
             <form onSubmit={handleSubmit} className="contact-form-inner" style={{
               background: 'rgba(3,7,18,0.88)', backdropFilter: 'blur(24px)',
-              border: '1px solid rgba(0, 212, 255, 0.25)', borderRadius: '28px',
-              padding: '32px 28px', position: 'relative', overflow: 'hidden',
+              border: '1px solid rgba(0, 212, 255, 0.25)', position: 'relative', overflow: 'hidden',
               display: 'grid', gridTemplateColumns: '1fr 1fr',
               gap: '14px', alignContent: 'start',
             }}>
@@ -219,40 +229,61 @@ const Contact = () => {
                   style={{ ...inputStyle, resize: 'none' }} className="contact-input" />
               </div>
 
-              {/* Submit */}
+              {/* Submit / WhatsApp Link Fallback */}
               <MagneticCard
                 tiltStrength={5}
                 scaleHover={1.02}
                 zDepth={8}
-                glowColor="#00d4ff"
-                data-cursor-color="#00d4ff"
+                glowColor={status === 'success' ? '#25d366' : '#00d4ff'}
+                data-cursor-color={status === 'success' ? '#25d366' : '#00d4ff'}
                 style={{ gridColumn: 'span 2', display: 'block', zIndex: 1 }}
               >
-                <button type="submit" disabled={status === 'loading'} className="send-btn" style={{
-                  width: '100%', padding: '16px',
-                  background: status === 'success'
-                    ? 'linear-gradient(135deg, #25d366, #06ffa5)'
-                    : status === 'error'
-                    ? 'linear-gradient(135deg, #ff006e, #ff4444)'
-                    : 'linear-gradient(135deg, #00d4ff, #6366f1)',
-                  borderRadius: '12px', fontWeight: '700', fontSize: '1rem',
-                  color: status === 'success' ? '#000' : 'white',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-                  transition: 'all 0.3s ease', cursor: status === 'loading' ? 'not-allowed' : 'pointer',
-                  opacity: status === 'loading' ? 0.8 : 1,
-                  boxShadow: '0 8px 28px rgba(0,212,255,0.3)',
-                  boxSizing: 'border-box',
-                }}>
-                  {status === 'loading' && <Loader size={18} style={{ animation: 'spin 1s linear infinite' }} />}
-                  {status === 'success' && <MessageCircle size={18} />}
-                  {status === 'idle' && <><Zap size={18} /><Send size={18} /></>}
-                  <span>
-                    {status === 'loading' ? 'Transmitting...'
-                      : status === 'success' ? '✓ Sent! WhatsApp opening...'
-                      : status === 'error' ? '✗ Failed — Try Again'
-                      : 'Send Message'}
-                  </span>
-                </button>
+                {status === 'success' ? (
+                  <a
+                    href={waUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="send-btn"
+                    style={{
+                      width: '100%', padding: '16px',
+                      background: 'linear-gradient(135deg, #25d366, #06ffa5)',
+                      borderRadius: '12px', fontWeight: '700', fontSize: '1rem',
+                      color: '#000',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+                      transition: 'all 0.3s ease',
+                      boxShadow: '0 8px 28px rgba(37,211,102,0.4)',
+                      textDecoration: 'none',
+                      boxSizing: 'border-box',
+                    }}
+                  >
+                    <MessageCircle size={18} />
+                    <span>Open WhatsApp Chat</span>
+                  </a>
+                ) : (
+                  <button type="submit" disabled={status === 'loading'} className="send-btn" style={{
+                    width: '100%', padding: '16px',
+                    background: status === 'error'
+                      ? 'linear-gradient(135deg, #ff006e, #ff4444)'
+                      : 'linear-gradient(135deg, #00d4ff, #6366f1)',
+                    borderRadius: '12px', fontWeight: '700', fontSize: '1rem',
+                    color: 'white',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+                    transition: 'all 0.3s ease', cursor: status === 'loading' ? 'not-allowed' : 'pointer',
+                    opacity: status === 'loading' ? 0.8 : 1,
+                    boxShadow: '0 8px 28px rgba(0,212,255,0.3)',
+                    boxSizing: 'border-box',
+                    border: 'none',
+                  }}>
+                    {status === 'loading' && <Loader size={18} style={{ animation: 'spin 1s linear infinite' }} />}
+                    {status === 'idle' && <><Zap size={18} /><Send size={18} /></>}
+                    {status === 'error' && <><Zap size={18} /><Send size={18} /></>}
+                    <span>
+                      {status === 'loading' ? 'Transmitting...'
+                        : status === 'error' ? '✗ Failed — Try Again'
+                        : 'Send Message'}
+                    </span>
+                  </button>
+                )}
               </MagneticCard>
 
               {/* Success feedback */}
@@ -265,7 +296,7 @@ const Contact = () => {
                   animation: 'fadeInUp 0.3s ease', zIndex: 1,
                 }}>
                   <MessageCircle size={15} />
-                  Message delivered! WhatsApp is opening — just tap Send to also notify via chat.
+                  Message delivered! WhatsApp is opening! If it didn't open automatically, tap the button above.
                 </div>
               )}
 
@@ -293,6 +324,10 @@ const Contact = () => {
       </div>
 
       <style>{`
+        .contact-form-inner {
+          padding: 32px 28px;
+          border-radius: 28px;
+        }
         .contact-input:focus {
           border-color: rgba(0,212,255,0.6) !important;
           box-shadow: 0 0 20px rgba(0,212,255,0.15) !important;
@@ -317,8 +352,13 @@ const Contact = () => {
         }
         @media (max-width: 520px) {
           .contact-form-inner { grid-template-columns: 1fr !important; }
-          .contact-form-inner > div[style*="span 2"],
-          .contact-form-inner > button { grid-column: span 1 !important; }
+          .contact-form-inner > * { grid-column: span 1 !important; }
+        }
+        @media (max-width: 480px) {
+          .contact-form-inner {
+            padding: 24px 16px !important;
+            border-radius: 20px !important;
+          }
         }
       `}</style>
     </section>

@@ -63,14 +63,9 @@ export function openWhatsApp(message) {
   const encoded = encodeURIComponent(message);
   const url = `https://wa.me/${WA_NUMBER}?text=${encoded}`;
   
-  const isMobile = typeof window !== 'undefined' && typeof navigator !== 'undefined' && 
-    /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
-  
-  if (isMobile) {
-    window.location.href = url;
-  } else {
-    window.open(url, '_blank', 'noopener');
-  }
+  // Use window.open to open in a new tab/app prompt, preventing the SPA from resetting/reloading
+  // when the user returns to the browser tab.
+  window.open(url, '_blank', 'noopener,noreferrer');
 }
 
 export function buildOrderWAMessage(formData) {

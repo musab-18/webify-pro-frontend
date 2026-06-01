@@ -31,6 +31,11 @@ export default function MagneticCard({
   const glowRef = useRef();
 
   useEffect(() => {
+    const isMobile = typeof window !== 'undefined' && typeof navigator !== 'undefined' && 
+      /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
+    
+    if (isMobile) return;
+
     const wrap = wrapRef.current;
     const inner = innerRef.current;
     const glow = glowRef.current;
