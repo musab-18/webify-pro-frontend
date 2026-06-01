@@ -47,8 +47,8 @@ const Navbar = () => {
       alignItems: 'center',
       padding: isScrolled ? '16px 5%' : '24px 5%',
       background: isScrolled
-        ? 'rgba(3, 7, 18, 0.95)'
-        : 'rgba(3, 7, 18, 0.1)',
+        ? 'rgba(3, 7, 18, 0.96)'
+        : 'rgba(3, 7, 18, 0.76)',
       backdropFilter: 'blur(20px)',
       WebkitBackdropFilter: 'blur(20px)',
       borderBottom: isScrolled ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(255, 255, 255, 0.01)',
@@ -235,12 +235,12 @@ const Navbar = () => {
                     fontSize: '1.4rem',
                     fontWeight: '800',
                     fontFamily: 'Outfit, sans-serif',
-                    color: isActive ? '#6366f1' : 'rgba(255,255,255,0.85)',
+                    color: isActive ? '#00d4ff' : 'rgba(255,255,255,0.85)',
                     textDecoration: 'none',
                     padding: '14px 20px',
                     borderRadius: '16px',
-                    background: isActive ? 'rgba(99,102,241,0.08)' : 'rgba(255,255,255,0.02)',
-                    border: isActive ? '1px solid rgba(99,102,241,0.2)' : '1px solid rgba(255,255,255,0.05)',
+                    background: isActive ? 'rgba(0, 212, 255, 0.08)' : 'rgba(255,255,255,0.02)',
+                    border: isActive ? '1px solid rgba(0, 212, 255, 0.2)' : '1px solid rgba(255,255,255,0.05)',
                     opacity: 0,
                     animation: 'menuSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards',
                     animationDelay: `${idx * 0.08}s`,
