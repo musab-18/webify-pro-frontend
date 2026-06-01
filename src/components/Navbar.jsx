@@ -114,9 +114,9 @@ const Navbar = () => {
               style={{
                 padding: '8px 14px',
                 borderRadius: '8px',
-                color: activeSection === link.id ? '#ffffff' : 'rgba(255,255,255,0.55)',
-                background: activeSection === link.id ? 'rgba(99,102,241,0.12)' : 'transparent',
-                border: activeSection === link.id ? '1px solid rgba(99,102,241,0.25)' : '1px solid transparent',
+                color: activeSection === link.id ? '#00d4ff' : 'rgba(255, 255, 255, 0.85)',
+                background: activeSection === link.id ? 'rgba(0, 212, 255, 0.08)' : 'transparent',
+                border: activeSection === link.id ? '1px solid rgba(0, 212, 255, 0.22)' : '1px solid transparent',
                 fontSize: '0.9rem',
                 transition: 'all 0.25s ease',
                 textDecoration: 'none',
