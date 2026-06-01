@@ -46,11 +46,18 @@ const Contact = () => {
 
   const inputStyle = {
     width: '100%', padding: '13px 16px',
-    background: 'rgba(0,0,0,0.3)',
-    border: '1px solid rgba(255,255,255,0.1)',
-    borderRadius: '10px', color: '#f0f0f0', outline: 'none',
-    fontSize: '0.92rem', transition: 'border-color 0.3s ease, box-shadow 0.3s ease',
-    boxSizing: 'border-box', fontFamily: 'Inter, sans-serif',
+    background: 'rgba(0,0,0,0.4)',
+    border: '1px solid rgba(0, 212, 255, 0.3)',
+    borderRadius: '10px', color: '#e0f7ff', outline: 'none',
+    fontFamily: "'Courier New', monospace", fontSize: '0.9rem',
+    transition: 'border-color 0.3s ease, box-shadow 0.3s ease',
+    boxSizing: 'border-box',
+  };
+
+  const labelStyle = {
+    display: 'block', marginBottom: '7px',
+    fontSize: '0.72rem', color: 'rgba(0, 212, 255, 0.8)',
+    fontFamily: 'monospace', letterSpacing: '0.05em',
   };
 
   return (
@@ -158,92 +165,130 @@ const Contact = () => {
 
         {/* ── Right: Form ── */}
         <ScrollReveal direction="right">
-          <form onSubmit={handleSubmit} className="contact-form-inner" style={{
-            display: 'grid', gridTemplateColumns: '1fr 1fr',
-            gap: '14px', alignContent: 'start',
-          }}>
-            {[
-              { type: 'text', placeholder: 'Your Name', key: 'name', label: 'Name' },
-              { type: 'email', placeholder: 'your@email.com', key: 'email', label: 'Email' },
-              { type: 'tel', placeholder: '+1 234 567 890', key: 'phone', label: 'Phone' },
-              { type: 'text', placeholder: 'Project Subject', key: 'subject', label: 'Subject' },
-            ].map(({ type, placeholder, key, label }) => (
-              <div key={key} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <label style={{ fontSize: '0.76rem', color: 'rgba(255,255,255,0.38)', fontWeight: '500' }}>{label}</label>
-                <input type={type} placeholder={placeholder} required
-                  value={formData[key]} onChange={set(key)}
-                  style={inputStyle} className="contact-input" />
-              </div>
-            ))}
+          <div>
+            <h3 className="outfit" style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '22px', color: '#fff' }}>
+              Send a Message
+            </h3>
 
-            <div style={{ gridColumn: 'span 2', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <label style={{ fontSize: '0.76rem', color: 'rgba(255,255,255,0.38)', fontWeight: '500' }}>Message</label>
-              <textarea placeholder="Tell us about your project..." required rows={5}
-                value={formData.message} onChange={set('message')}
-                style={{ ...inputStyle, resize: 'none' }} className="contact-input" />
-            </div>
-
-            {/* Submit */}
-            <MagneticCard
-              tiltStrength={5}
-              scaleHover={1.02}
-              zDepth={8}
-              glowColor="#00d4ff"
-              data-cursor-color="#00d4ff"
-              style={{ gridColumn: 'span 2', display: 'block' }}
-            >
-              <button type="submit" disabled={status === 'loading'} className="send-btn" style={{
-                width: '100%', padding: '16px',
-                background: status === 'success'
-                  ? 'linear-gradient(135deg, #25d366, #06ffa5)'
-                  : status === 'error'
-                  ? 'linear-gradient(135deg, #ff006e, #ff4444)'
-                  : 'linear-gradient(135deg, #00d4ff, #6366f1)',
-                borderRadius: '12px', fontWeight: '700', fontSize: '1rem',
-                color: status === 'success' ? '#000' : 'white',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-                transition: 'all 0.3s ease', cursor: status === 'loading' ? 'not-allowed' : 'pointer',
-                opacity: status === 'loading' ? 0.8 : 1,
-                boxShadow: '0 8px 28px rgba(0,212,255,0.3)',
-                boxSizing: 'border-box',
+            <form onSubmit={handleSubmit} className="contact-form-inner" style={{
+              background: 'rgba(3,7,18,0.88)', backdropFilter: 'blur(24px)',
+              border: '1px solid rgba(0, 212, 255, 0.25)', borderRadius: '28px',
+              padding: '32px 28px', position: 'relative', overflow: 'hidden',
+              display: 'grid', gridTemplateColumns: '1fr 1fr',
+              gap: '14px', alignContent: 'start',
+            }}>
+              {/* Terminal bar */}
+              <div style={{
+                gridColumn: 'span 2',
+                display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px',
+                marginBottom: '10px', paddingBottom: '16px',
+                borderBottom: '1px solid rgba(255,255,255,0.06)',
+                zIndex: 1,
               }}>
-                {status === 'loading' && <Loader size={18} style={{ animation: 'spin 1s linear infinite' }} />}
-                {status === 'success' && <MessageCircle size={18} />}
-                {status === 'idle' && <><Zap size={18} /><Send size={18} /></>}
-                <span>
-                  {status === 'loading' ? 'Transmitting...'
-                    : status === 'success' ? '✓ Sent! WhatsApp opening...'
-                    : status === 'error' ? '✗ Failed — Try Again'
-                    : 'Send Message'}
+                {['#00d4ff', '#6366f1', '#a855f7'].map((c, i) => (
+                  <div key={i} style={{ width: '10px', height: '10px', borderRadius: '50%', background: c, opacity: 0.8 }} />
+                ))}
+                <span style={{ marginLeft: '6px', fontSize: '0.72rem', fontFamily: 'monospace', color: 'rgba(255,255,255,0.3)' }}>
+                  webifypro ~ contact_terminal
                 </span>
-              </button>
-            </MagneticCard>
-
-            {/* Success feedback */}
-            {status === 'success' && (
-              <div style={{
-                gridColumn: 'span 2', padding: '12px 16px',
-                background: 'rgba(37,211,102,0.1)', border: '1px solid rgba(37,211,102,0.3)',
-                borderRadius: '10px', fontSize: '0.82rem', color: '#25d366',
-                display: 'flex', alignItems: 'center', gap: '8px',
-                animation: 'fadeInUp 0.3s ease',
-              }}>
-                <MessageCircle size={15} />
-                Message delivered! WhatsApp is opening — just tap Send to also notify via chat.
+                <div style={{ marginLeft: 'auto', display: 'flex', gap: '4px' }}>
+                  {[0, 1, 2].map(i => (
+                    <div key={i} style={{ width: '4px', height: '4px', borderRadius: '50%', background: 'rgba(0, 212, 255, 0.7)', animation: `blink-dot 1.5s ${i * 0.4}s infinite` }} />
+                  ))}
+                </div>
               </div>
-            )}
 
-            {status === 'error' && (
-              <div style={{
-                gridColumn: 'span 2', padding: '12px 16px',
-                background: 'rgba(255,0,110,0.1)', border: '1px solid rgba(255,0,110,0.3)',
-                borderRadius: '10px', fontSize: '0.82rem', color: '#ff006e',
-                animation: 'fadeInUp 0.3s ease',
-              }}>
-                ✗ Email failed. Please check your Web3Forms key in .env and restart the server.
+              {[
+                { type: 'text', placeholder: 'Your Name', key: 'name', label: '> client_name' },
+                { type: 'email', placeholder: 'your@email.com', key: 'email', label: '> email_address' },
+                { type: 'tel', placeholder: '+1 234 567 890', key: 'phone', label: '> phone_number' },
+                { type: 'text', placeholder: 'Project Subject', key: 'subject', label: '> message_subject' },
+              ].map(({ type, placeholder, key, label }) => (
+                <div key={key} style={{ display: 'flex', flexDirection: 'column', gap: '6px', zIndex: 1 }}>
+                  <label style={labelStyle}>{label}</label>
+                  <input type={type} placeholder={placeholder} required
+                    value={formData[key]} onChange={set(key)}
+                    style={inputStyle} className="contact-input" />
+                </div>
+              ))}
+
+              <div style={{ gridColumn: 'span 2', display: 'flex', flexDirection: 'column', gap: '6px', zIndex: 1 }}>
+                <label style={labelStyle}>&gt; message_content</label>
+                <textarea placeholder="Tell us about your project..." required rows={5}
+                  value={formData.message} onChange={set('message')}
+                  style={{ ...inputStyle, resize: 'none' }} className="contact-input" />
               </div>
-            )}
-          </form>
+
+              {/* Submit */}
+              <MagneticCard
+                tiltStrength={5}
+                scaleHover={1.02}
+                zDepth={8}
+                glowColor="#00d4ff"
+                data-cursor-color="#00d4ff"
+                style={{ gridColumn: 'span 2', display: 'block', zIndex: 1 }}
+              >
+                <button type="submit" disabled={status === 'loading'} className="send-btn" style={{
+                  width: '100%', padding: '16px',
+                  background: status === 'success'
+                    ? 'linear-gradient(135deg, #25d366, #06ffa5)'
+                    : status === 'error'
+                    ? 'linear-gradient(135deg, #ff006e, #ff4444)'
+                    : 'linear-gradient(135deg, #00d4ff, #6366f1)',
+                  borderRadius: '12px', fontWeight: '700', fontSize: '1rem',
+                  color: status === 'success' ? '#000' : 'white',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+                  transition: 'all 0.3s ease', cursor: status === 'loading' ? 'not-allowed' : 'pointer',
+                  opacity: status === 'loading' ? 0.8 : 1,
+                  boxShadow: '0 8px 28px rgba(0,212,255,0.3)',
+                  boxSizing: 'border-box',
+                }}>
+                  {status === 'loading' && <Loader size={18} style={{ animation: 'spin 1s linear infinite' }} />}
+                  {status === 'success' && <MessageCircle size={18} />}
+                  {status === 'idle' && <><Zap size={18} /><Send size={18} /></>}
+                  <span>
+                    {status === 'loading' ? 'Transmitting...'
+                      : status === 'success' ? '✓ Sent! WhatsApp opening...'
+                      : status === 'error' ? '✗ Failed — Try Again'
+                      : 'Send Message'}
+                  </span>
+                </button>
+              </MagneticCard>
+
+              {/* Success feedback */}
+              {status === 'success' && (
+                <div style={{
+                  gridColumn: 'span 2', padding: '12px 16px',
+                  background: 'rgba(37,211,102,0.1)', border: '1px solid rgba(37,211,102,0.3)',
+                  borderRadius: '10px', fontSize: '0.82rem', color: '#25d366',
+                  display: 'flex', alignItems: 'center', gap: '8px',
+                  animation: 'fadeInUp 0.3s ease', zIndex: 1,
+                }}>
+                  <MessageCircle size={15} />
+                  Message delivered! WhatsApp is opening — just tap Send to also notify via chat.
+                </div>
+              )}
+
+              {/* Error feedback */}
+              {status === 'error' && (
+                <div style={{
+                  gridColumn: 'span 2', padding: '12px 16px',
+                  background: 'rgba(255,0,110,0.1)', border: '1px solid rgba(255,0,110,0.3)',
+                  borderRadius: '10px', fontSize: '0.82rem', color: '#ff006e',
+                  animation: 'fadeInUp 0.3s ease', zIndex: 1,
+                }}>
+                  ✗ Email failed. Please check your Web3Forms key in .env and restart the server.
+                </div>
+              )}
+
+              {/* Grid overlay */}
+              <div style={{
+                position: 'absolute', inset: 0, borderRadius: '28px', zIndex: 0, pointerEvents: 'none',
+                backgroundImage: 'linear-gradient(rgba(0, 212, 255, 0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(0, 212, 255, 0.02) 1px,transparent 1px)',
+                backgroundSize: '30px 30px',
+              }} />
+            </form>
+          </div>
         </ScrollReveal>
       </div>
 

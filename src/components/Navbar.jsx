@@ -45,14 +45,14 @@ const Navbar = () => {
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
-      padding: isScrolled ? '14px 5%' : '22px 5%',
+      padding: isScrolled ? '16px 5%' : '24px 5%',
       background: isScrolled
-        ? 'rgba(3, 7, 18, 0.88)'
-        : 'transparent',
-      backdropFilter: isScrolled ? 'blur(24px)' : 'none',
-      WebkitBackdropFilter: isScrolled ? 'blur(24px)' : 'none',
-      borderBottom: isScrolled ? '1px solid rgba(99,102,241,0.12)' : 'none',
-      boxShadow: isScrolled ? '0 4px 30px rgba(0,0,0,0.3)' : 'none',
+        ? 'rgba(3, 7, 18, 0.95)'
+        : 'rgba(3, 7, 18, 0.1)',
+      backdropFilter: 'blur(20px)',
+      WebkitBackdropFilter: 'blur(20px)',
+      borderBottom: isScrolled ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(255, 255, 255, 0.01)',
+      boxShadow: isScrolled ? '0 10px 40px rgba(0, 0, 0, 0.8)' : 'none',
       transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
     }}>
       {/* Logo */}
