@@ -162,46 +162,126 @@ const Navbar = () => {
       </ul>
 
       {/* Mobile hamburger */}
-      <div
-        className="mobile-menu-btn"
-        onClick={() => setIsMenuOpen(!isMenuOpen)}
-        style={{ display: 'none', color: 'white', cursor: 'pointer', zIndex: 101 }}
-      >
-        {isMenuOpen ? <X size={28} /> : <Menu size={28} />}
-      </div>
+      {!isMenuOpen && (
+        <div
+          className="mobile-menu-btn"
+          onClick={() => setIsMenuOpen(true)}
+          style={{ display: 'none', color: 'white', cursor: 'pointer', zIndex: 101 }}
+        >
+          <Menu size={28} />
+        </div>
+      )}
 
       {/* Mobile menu overlay */}
       {isMenuOpen && (
         <div style={{
           position: 'fixed',
           inset: 0,
-          background: 'rgba(3, 7, 18, 0.97)',
+          background: 'radial-gradient(circle at 50% 30%, rgba(10, 10, 30, 0.99) 0%, rgba(3, 3, 10, 1) 100%)',
           backdropFilter: 'blur(24px)',
+          WebkitBackdropFilter: 'blur(24px)',
           display: 'flex',
           flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '32px',
-          zIndex: 100,
-          animation: 'fadeIn 0.3s ease',
+          zIndex: 9999,
+          animation: 'overlayFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+          boxSizing: 'border-box',
+          padding: '24px 6% 36px',
         }} className="mobile-overlay">
-          {[...navLinks, { href: '#contact', label: 'Contact Us', id: 'contact' }].map(link => (
-            <a
-              key={link.id}
-              href={link.href}
+          
+          {/* Overlay Header */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            width: '100%',
+            marginBottom: '36px',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <Rocket size={30} color="#6366f1" style={{ filter: 'drop-shadow(0 0 6px rgba(99,102,241,0.8))' }} />
+              <span className="outfit" style={{ fontSize: '1.5rem', fontWeight: '900', color: '#fff', letterSpacing: '-0.6px' }}>
+                WEBIFY <span style={{ background: 'linear-gradient(135deg, #6366f1, #00d4ff)', backgroundClip: 'text', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>PRO</span>
+              </span>
+            </div>
+            
+            <div 
               onClick={() => setIsMenuOpen(false)}
-              style={{
-                fontSize: '1.8rem',
-                fontWeight: '700',
-                fontFamily: 'Outfit, sans-serif',
-                color: activeSection === link.id ? '#6366f1' : 'rgba(255,255,255,0.8)',
-                textDecoration: 'none',
-                transition: 'color 0.2s ease',
-              }}
+              style={{ color: '#fff', cursor: 'pointer', padding: '8px' }}
             >
-              {link.label}
+              <X size={28} />
+            </div>
+          </div>
+
+          {/* Navigation Links */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '12px',
+            width: '100%',
+            flex: 1,
+            justifyContent: 'center',
+          }}>
+            {[...navLinks, { href: '#contact', label: 'Contact Us', id: 'contact' }].map((link, idx) => {
+              const num = String(idx + 1).padStart(2, '0');
+              const isActive = activeSection === link.id;
+              return (
+                <a
+                  key={link.id}
+                  href={link.href}
+                  onClick={() => setIsMenuOpen(false)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '20px',
+                    fontSize: '1.4rem',
+                    fontWeight: '800',
+                    fontFamily: 'Outfit, sans-serif',
+                    color: isActive ? '#6366f1' : 'rgba(255,255,255,0.85)',
+                    textDecoration: 'none',
+                    padding: '14px 20px',
+                    borderRadius: '16px',
+                    background: isActive ? 'rgba(99,102,241,0.08)' : 'rgba(255,255,255,0.02)',
+                    border: isActive ? '1px solid rgba(99,102,241,0.2)' : '1px solid rgba(255,255,255,0.05)',
+                    opacity: 0,
+                    animation: 'menuSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                    animationDelay: `${idx * 0.08}s`,
+                    transition: 'all 0.3s ease',
+                    boxShadow: isActive ? '0 4px 20px rgba(99,102,241,0.1)' : 'none',
+                  }}
+                >
+                  <span style={{
+                    fontSize: '0.8rem',
+                    fontFamily: 'monospace',
+                    color: isActive ? '#00d4ff' : 'rgba(255,255,255,0.3)',
+                    fontWeight: '500',
+                  }}>{num}</span>
+                  <span>{link.label}</span>
+                  {isActive && <span style={{ marginLeft: 'auto', fontSize: '1rem', color: '#6366f1' }}>●</span>}
+                </a>
+              );
+            })}
+          </div>
+
+          {/* Footer Channels */}
+          <div style={{
+            marginTop: 'auto',
+            paddingTop: '24px',
+            borderTop: '1px solid rgba(255,255,255,0.08)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px',
+            width: '100%',
+          }}>
+            <div style={{ fontSize: '0.68rem', fontFamily: 'monospace', color: 'rgba(255,255,255,0.3)', letterSpacing: '0.05em' }}>
+              // CHANNELS
+            </div>
+            <a href="mailto:WEBIFYPRO9@GMAIL.COM" style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.6)', textDecoration: 'none' }}>
+              📧 WEBIFYPRO9@GMAIL.COM
             </a>
-          ))}
+            <a href="https://wa.me/923708316591" style={{ fontSize: '0.82rem', color: '#25d366', textDecoration: 'none', fontWeight: '600' }}>
+              💬 +92 370 8316591 (WhatsApp)
+            </a>
+          </div>
+
         </div>
       )}
 
@@ -214,9 +294,13 @@ const Navbar = () => {
           0%, 100% { transform: scale(1); opacity: 0.5; }
           50% { transform: scale(1.4); opacity: 0.2; }
         }
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
+        @keyframes overlayFadeIn {
+          from { opacity: 0; backdrop-filter: blur(0px); -webkit-backdrop-filter: blur(0px); }
+          to { opacity: 1; backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); }
+        }
+        @keyframes menuSlideIn {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
         }
         .nav-link:hover {
           color: white !important;
