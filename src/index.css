@@ -32,6 +32,8 @@ html {
   scroll-behavior: smooth;
   scrollbar-width: thin;
   scrollbar-color: rgba(99,102,241,0.5) transparent;
+  overflow-x: hidden;
+  max-width: 100%;
 }
 html::-webkit-scrollbar { width: 5px; }
 html::-webkit-scrollbar-track { background: transparent; }
@@ -46,6 +48,7 @@ body {
   color: var(--text);
   line-height: 1.6;
   overflow-x: hidden;
+  max-width: 100%;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
 }
@@ -60,7 +63,7 @@ canvas { display: block; }
 /* ═══════════════════════════════════════════
    APP LAYER SYSTEM
 ═══════════════════════════════════════════ */
-.App { position: relative; min-height: 100vh; }
+.App { position: relative; min-height: 100vh; overflow-x: hidden; max-width: 100%; }
 
 /* ═══════════════════════════════════════════
    SECTION LAYOUT

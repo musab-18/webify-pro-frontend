@@ -99,7 +99,7 @@ const Portfolio = () => {
         stagger={0.12}
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 290px), 1fr))',
           gap: '28px',
         }}
       >
