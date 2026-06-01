@@ -61,7 +61,16 @@ export async function sendContactEmail(formData) {
 // ─── Open WhatsApp with pre-filled message ────────────────────────────────────
 export function openWhatsApp(message) {
   const encoded = encodeURIComponent(message);
-  window.open(`https://wa.me/${WA_NUMBER}?text=${encoded}`, '_blank', 'noopener');
+  const url = `https://wa.me/${WA_NUMBER}?text=${encoded}`;
+  
+  const isMobile = typeof window !== 'undefined' && typeof navigator !== 'undefined' && 
+    /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
+  
+  if (isMobile) {
+    window.location.href = url;
+  } else {
+    window.open(url, '_blank', 'noopener');
+  }
 }
 
 export function buildOrderWAMessage(formData) {
