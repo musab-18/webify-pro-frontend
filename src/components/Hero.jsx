@@ -1,117 +1,214 @@
-import React from 'react';
-import { ChevronRight, Globe, BarChart3 } from 'lucide-react';
+import React, { useEffect, useRef } from 'react';
+import { ChevronRight, Globe, Zap } from 'lucide-react';
+import gsap from 'gsap';
+import GlitchText from './motion/GlitchText';
+import ParallaxLayer from './motion/ParallaxLayer';
+import MagneticCard from './motion/MagneticCard';
 
 const Hero = () => {
-    return (
-        <section id="home" style={{
-            minHeight: '100vh',
-            display: 'flex',
-            alignItems: 'center',
-            position: 'relative',
-            overflow: 'hidden'
-        }}>
-            {/* Background Blobs */}
-            <div style={{
-                position: 'absolute',
-                top: '10%',
-                right: '-5%',
-                width: '500px',
-                height: '500px',
-                background: 'radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%)',
-                zIndex: -1,
-                borderRadius: '50%',
-                filter: 'blur(40px)'
-            }}></div>
-            <div style={{
-                position: 'absolute',
-                bottom: '10%',
-                left: '-5%',
-                width: '400px',
-                height: '400px',
-                background: 'radial-gradient(circle, rgba(236, 72, 153, 0.15) 0%, transparent 70%)',
-                zIndex: -1,
-                borderRadius: '50%',
-                filter: 'blur(40px)'
-            }}></div>
+  const headRef = useRef();
+  const subRef = useRef();
+  const ctaRef = useRef();
+  const badgeRef = useRef();
+  const statsRef = useRef();
 
-            <div style={{ maxWidth: '800px' }}>
-                <div style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '10px',
-                    padding: '8px 16px',
-                    borderRadius: '100px',
-                    background: 'var(--glass)',
-                    border: '1px solid var(--glass-border)',
-                    marginBottom: '24px',
-                    fontSize: '0.9rem',
-                    fontWeight: '500'
-                }}>
-                    <span style={{ color: 'var(--primary)' }}>●</span> Available for new projects
-                </div>
+  useEffect(() => {
+    const tl = gsap.timeline({ delay: 0.4 });
+    tl.fromTo(badgeRef.current, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' })
+      .fromTo(headRef.current, { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.9, ease: 'power3.out' }, '-=0.2')
+      .fromTo(subRef.current, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' }, '-=0.4')
+      .fromTo(ctaRef.current, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' }, '-=0.3')
+      .fromTo(statsRef.current, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out' }, '-=0.2');
+  }, []);
 
-                <h1 className="outfit" style={{
-                    fontSize: 'clamp(3rem, 8vw, 5rem)',
-                    lineHeight: '1.1',
-                    fontWeight: '800',
-                    marginBottom: '24px'
-                }}>
-                    Building Digital <span className="gradient-text">Masterpieces</span> That Drive Results.
-                </h1>
+  return (
+    <section id="home" style={{
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      position: 'relative',
+      overflow: 'hidden',
+      padding: '100px 6% 60px',
+    }}>
+      <div style={{ maxWidth: '720px', width: '100%', position: 'relative', zIndex: 2 }}>
+        <ParallaxLayer depth={3}>
+          {/* Badge */}
+          <div ref={badgeRef} style={{
+            display: 'inline-flex', alignItems: 'center', gap: '10px',
+            padding: '8px 18px', borderRadius: '100px',
+            background: 'rgba(99,102,241,0.1)',
+            border: '1px solid rgba(99,102,241,0.3)',
+            marginBottom: '28px', fontSize: '0.85rem', fontWeight: '600',
+            backdropFilter: 'blur(10px)', opacity: 0,
+          }}>
+            <span style={{
+              display: 'inline-block', width: '8px', height: '8px',
+              borderRadius: '50%', background: '#06ffa5',
+              boxShadow: '0 0 8px #06ffa5', animation: 'pulse-dot 2s infinite',
+            }} />
+            Available for new projects
+          </div>
 
-                <p style={{
-                    fontSize: 'clamp(1rem, 2vw, 1.25rem)',
-                    color: 'var(--text-muted)',
-                    marginBottom: '40px',
-                    maxWidth: '600px'
-                }}>
-                    Elevate your brand with high-performance web development and strategic digital marketing. We turn your vision into a powerful online presence.
-                </p>
+          {/* Heading */}
+          <h1 ref={headRef} className="outfit" style={{
+            fontSize: 'clamp(2.4rem, 7vw, 5.2rem)',
+            lineHeight: '1.08', fontWeight: '800',
+            marginBottom: '24px', opacity: 0,
+            textShadow: '0 0 40px rgba(99,102,241,0.25)',
+          }}>
+            Building Digital{' '}
+            <GlitchText interval={6}>
+              <span style={{
+                background: 'linear-gradient(135deg, #6366f1, #00d4ff, #a855f7)',
+                backgroundClip: 'text', WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundSize: '200% 200%', animation: 'gradient-shift 4s ease infinite',
+              }}>Masterpieces</span>
+            </GlitchText>{' '}
+            That Drive Results.
+          </h1>
 
-                <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
-                    <a href="#order" style={{
-                        padding: '16px 32px',
-                        background: 'linear-gradient(135deg, var(--primary), var(--accent))',
-                        borderRadius: '12px',
-                        fontWeight: '600',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '10px',
-                        boxShadow: '0 10px 25px -5px rgba(99, 102, 241, 0.4)',
-                        transition: 'var(--transition)'
-                    }}
-                        className="btn-primary"
-                    >
-                        Start Your Project <ChevronRight size={20} />
-                    </a>
+          {/* Subtext */}
+          <p ref={subRef} style={{
+            fontSize: 'clamp(0.95rem, 2vw, 1.15rem)',
+            color: 'rgba(255,255,255,0.6)',
+            marginBottom: '40px', maxWidth: '560px', lineHeight: '1.75', opacity: 0,
+          }}>
+            Elevate your brand with high-performance web development and strategic digital marketing.
+            We turn your vision into a powerful online presence —{' '}
+            <strong style={{ color: '#00d4ff', fontWeight: '600' }}>from Pakistan to the world</strong>.
+          </p>
+        </ParallaxLayer>
 
-                    <a href="#portfolio" style={{
-                        padding: '16px 32px',
-                        background: 'var(--glass)',
-                        border: '1px solid var(--glass-border)',
-                        borderRadius: '12px',
-                        fontWeight: '600',
-                        transition: 'var(--transition)'
-                    }}
-                        className="btn-secondary"
-                    >
-                        View Work
-                    </a>
-                </div>
-            </div>
+        {/* CTAs */}
+        <ParallaxLayer depth={4}>
+          <div ref={ctaRef} style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', opacity: 0 }}>
+            <MagneticCard
+              tiltStrength={8}
+              scaleHover={1.05}
+              zDepth={10}
+              glowColor="#6366f1"
+              data-cursor-color="#6366f1"
+              style={{ display: 'inline-block' }}
+            >
+              <a href="#order" className="hero-cta-primary">
+                <Zap size={17} />
+                Start Your Project
+                <ChevronRight size={17} />
+              </a>
+            </MagneticCard>
 
-            <style>{`
-        .btn-primary:hover {
-          transform: translateY(-3px);
-          box-shadow: 0 15px 30px -5px rgba(99, 102, 241, 0.5);
+            <MagneticCard
+              tiltStrength={8}
+              scaleHover={1.05}
+              zDepth={10}
+              glowColor="#00d4ff"
+              data-cursor-color="#00d4ff"
+              style={{ display: 'inline-block' }}
+            >
+              <a href="#portfolio" className="hero-cta-secondary">
+                <Globe size={17} />
+                View Our Work
+              </a>
+            </MagneticCard>
+          </div>
+        </ParallaxLayer>
+
+        {/* Stats */}
+        <ParallaxLayer depth={5}>
+          <div ref={statsRef} className="hero-stats" style={{
+            display: 'flex', gap: '40px', marginTop: '56px',
+            flexWrap: 'wrap', opacity: 0,
+          }}>
+            {[
+              { value: '50+', label: 'Projects Launched' },
+              { value: '100%', label: 'Client Satisfaction' },
+              { value: '24/7', label: 'Support Available' },
+            ].map(stat => (
+              <div key={stat.label}>
+                <div className="outfit" style={{
+                  fontSize: 'clamp(1.5rem, 4vw, 2rem)', fontWeight: '800',
+                  background: 'linear-gradient(135deg, #6366f1, #00d4ff)',
+                  backgroundClip: 'text', WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                }}>{stat.value}</div>
+                <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.45)', marginTop: '2px' }}>{stat.label}</div>
+              </div>
+            ))}
+          </div>
+        </ParallaxLayer>
+      </div>
+
+      {/* Scroll indicator */}
+      <div style={{
+        position: 'absolute', bottom: '36px', left: '50%',
+        transform: 'translateX(-50%)',
+        display: 'flex', flexDirection: 'column', alignItems: 'center',
+        gap: '8px', color: 'rgba(255,255,255,0.35)',
+        fontSize: '0.7rem', letterSpacing: '0.1em', zIndex: 2,
+      }}>
+        <span>SCROLL</span>
+        <div style={{
+          width: '1px', height: '36px',
+          background: 'linear-gradient(to bottom, rgba(99,102,241,0.8), transparent)',
+          animation: 'scroll-line 2s ease-in-out infinite',
+        }} />
+      </div>
+
+      <style>{`
+        @keyframes gradient-shift {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
         }
-        .btn-secondary:hover {
-          background: var(--surface-light);
-          transform: translateY(-3px);
+        @keyframes scroll-line {
+          0% { transform: scaleY(0); transform-origin: top; opacity: 1; }
+          50% { transform: scaleY(1); transform-origin: top; opacity: 1; }
+          100% { transform: scaleY(1); transform-origin: bottom; opacity: 0; }
+        }
+        .hero-cta-primary {
+          display: inline-flex; align-items: center; gap: 8px;
+          padding: 14px 26px;
+          background: linear-gradient(135deg, #6366f1, #a855f7);
+          border-radius: 12px; font-weight: 700; font-size: 0.95rem;
+          color: white; text-decoration: none;
+          box-shadow: 0 8px 28px rgba(99,102,241,0.5);
+          transition: all 0.3s ease; position: relative; overflow: hidden;
+        }
+        .hero-cta-primary::before {
+          content: ''; position: absolute; inset: 0;
+          background: linear-gradient(135deg, #00d4ff, #6366f1);
+          opacity: 0; transition: opacity 0.3s ease;
+        }
+        .hero-cta-primary:hover::before { opacity: 1; }
+        .hero-cta-primary:hover {
+          box-shadow: 0 16px 36px rgba(99,102,241,0.6);
+        }
+        .hero-cta-primary > * { position: relative; z-index: 1; }
+        .hero-cta-secondary {
+          display: inline-flex; align-items: center; gap: 8px;
+          padding: 14px 26px;
+          background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(255,255,255,0.15);
+          backdrop-filter: blur(10px); border-radius: 12px;
+          font-weight: 600; font-size: 0.95rem;
+          color: rgba(255,255,255,0.85); text-decoration: none;
+          transition: all 0.3s ease;
+        }
+        .hero-cta-secondary:hover {
+          border-color: rgba(99,102,241,0.6);
+          background: rgba(99,102,241,0.1);
+          color: white;
+        }
+        @media (max-width: 480px) {
+          .hero-cta-primary, .hero-cta-secondary {
+            width: 100%; justify-content: center;
+          }
+          .hero-stats { gap: 24px !important; }
         }
       `}</style>
-        </section>
-    );
+    </section>
+  );
 };
 
 export default Hero;
