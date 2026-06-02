@@ -45,8 +45,10 @@ export default function CursorFX() {
     const onMove = (e) => {
       mX = e.clientX;
       mY = e.clientY;
+    };
 
-      const el = document.elementFromPoint(mX, mY);
+    const onMouseOver = (e) => {
+      const el = e.target;
       if (!el) return;
 
       const btn = el.closest('button, a, [data-magnetic]');
@@ -61,6 +63,7 @@ export default function CursorFX() {
     const onUp = () => { rScaleTarget = 1; };
 
     window.addEventListener('mousemove', onMove, { passive: true });
+    window.addEventListener('mouseover', onMouseOver, { passive: true });
     window.addEventListener('mousedown', onDown);
     window.addEventListener('mouseup', onUp);
 
@@ -124,6 +127,7 @@ export default function CursorFX() {
 
     return () => {
       window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseover', onMouseOver);
       window.removeEventListener('mousedown', onDown);
       window.removeEventListener('mouseup', onUp);
       cancelAnimationFrame(raf);

@@ -71,7 +71,7 @@ const Hero = () => {
           {/* Subtext */}
           <p ref={subRef} style={{
             fontSize: 'clamp(0.95rem, 2vw, 1.15rem)',
-            color: 'rgba(255,255,255,0.6)',
+            color: 'rgba(255,255,255,0.78)',
             marginBottom: '40px', maxWidth: '560px', lineHeight: '1.75', opacity: 0,
           }}>
             Elevate your brand with high-performance web development and strategic digital marketing.
@@ -132,7 +132,7 @@ const Hero = () => {
                   backgroundClip: 'text', WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                 }}>{stat.value}</div>
-                <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.45)', marginTop: '2px' }}>{stat.label}</div>
+                <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)', marginTop: '2px' }}>{stat.label}</div>
               </div>
             ))}
           </div>

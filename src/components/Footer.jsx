@@ -1,4 +1,4 @@
-import { Rocket, Github, Linkedin, Facebook, Mail, MessageCircle } from 'lucide-react';
+import { Rocket, Github, Linkedin, Facebook, Mail, MessageCircle, ChevronRight } from 'lucide-react';
 
 const Footer = () => (
   <footer style={{
@@ -8,7 +8,7 @@ const Footer = () => (
     background: 'rgba(3,7,18,0.92)',
     backdropFilter: 'blur(20px)',
     WebkitBackdropFilter: 'blur(20px)',
-    borderTop: '1px solid rgba(99,102,241,0.12)',
+    borderTop: '1px solid rgba(99,102,241,0.22)',
   }}>
     <div className="footer-grid" style={{
       display: 'grid',
@@ -27,7 +27,7 @@ const Footer = () => (
             }}>PRO</span>
           </span>
         </div>
-        <p style={{ color: 'rgba(255,255,255,0.45)', maxWidth: '340px', fontSize: '0.9rem', lineHeight: '1.7' }}>
+        <p style={{ color: 'rgba(255,255,255,0.65)', maxWidth: '340px', fontSize: '0.9rem', lineHeight: '1.7' }}>
           Empowering businesses with cutting-edge digital solutions.
           From Pakistan to the world — we build the future of the web.
         </p>
@@ -51,9 +51,9 @@ const Footer = () => (
               style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 width: '38px', height: '38px', borderRadius: '10px',
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                color: 'rgba(255,255,255,0.5)',
+                background: 'rgba(255,255,255,0.07)',
+                border: '1px solid rgba(255,255,255,0.14)',
+                color: 'rgba(255,255,255,0.7)',
                 transition: 'all 0.3s ease',
               }}
             >{s.icon}</a>
@@ -76,11 +76,11 @@ const Footer = () => (
           ].map(link => (
             <li key={link.label}>
               <a href={link.href} className="footer-link" style={{
-                color: 'rgba(255,255,255,0.45)', fontSize: '0.9rem',
+                color: 'rgba(255,255,255,0.65)', fontSize: '0.9rem',
                 transition: 'color 0.2s ease', textDecoration: 'none',
-                display: 'flex', alignItems: 'center', gap: '6px',
+                display: 'flex', alignItems: 'center', gap: '4px',
               }}>
-                <span style={{ color: '#6366f1', fontSize: '0.6rem' }}>▶</span>
+                <ChevronRight className="footer-link-chevron" size={14} style={{ color: '#6366f1' }} />
                 {link.label}
               </a>
             </li>
@@ -97,11 +97,11 @@ const Footer = () => (
           {['Web Development', 'Digital Marketing', 'Mobile Apps', 'Social Media'].map(s => (
             <li key={s}>
               <a href="#services" className="footer-link" style={{
-                color: 'rgba(255,255,255,0.45)', fontSize: '0.9rem',
+                color: 'rgba(255,255,255,0.65)', fontSize: '0.9rem',
                 transition: 'color 0.2s ease', textDecoration: 'none',
-                display: 'flex', alignItems: 'center', gap: '6px',
+                display: 'flex', alignItems: 'center', gap: '4px',
               }}>
-                <span style={{ color: '#00d4ff', fontSize: '0.6rem' }}>▶</span>
+                <ChevronRight className="footer-link-chevron" size={14} style={{ color: '#00d4ff' }} />
                 {s}
               </a>
             </li>
@@ -116,7 +116,7 @@ const Footer = () => (
       paddingTop: '24px',
       display: 'flex', justifyContent: 'space-between', alignItems: 'center',
       flexWrap: 'wrap', gap: '12px',
-      color: 'rgba(255,255,255,0.3)', fontSize: '0.83rem',
+      color: 'rgba(255,255,255,0.5)', fontSize: '0.83rem',
     }}>
       <p>© {new Date().getFullYear()} Webify Pro. All rights reserved.</p>
       <p>
@@ -137,6 +137,14 @@ const Footer = () => (
         transform: translateY(-3px);
       }
       .footer-link:hover { color: #6366f1 !important; }
+      .footer-link-chevron {
+        transition: transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94), color 0.2s ease;
+        flex-shrink: 0;
+      }
+      .footer-link:hover .footer-link-chevron {
+        transform: translateX(4px);
+        color: #fff !important;
+      }
       @media (max-width: 768px) {
         .footer-grid {
           grid-template-columns: 1fr 1fr !important;

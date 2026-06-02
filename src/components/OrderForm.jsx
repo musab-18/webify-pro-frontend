@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
-import { Send, CheckCircle, Terminal, MessageCircle, Loader } from 'lucide-react';
-import { sendOrderEmail, openWhatsApp, buildOrderWAMessage, WA_NUMBER } from '../config/emailjs';
+import React, { useState, useEffect } from 'react';
+import { Send, CheckCircle, Terminal, MessageCircle } from 'lucide-react';
+import { sendOrderEmail, buildOrderWAMessage, WA_NUMBER } from '../config/emailjs';
 import GlitchText from './motion/GlitchText';
 import ScrollReveal from './motion/ScrollReveal';
 import MagneticCard from './motion/MagneticCard';
+import SubmissionPopup from './SubmissionPopup';
 
 const INITIAL = {
   service: 'Web Development',
@@ -15,46 +16,54 @@ const INITIAL = {
 
 const OrderForm = () => {
   const [formData, setFormData] = useState(INITIAL);
-  const [status, setStatus] = useState('idle'); // idle | loading | success | error
   const [pulseActive, setPulseActive] = useState(false);
+  const [popupOpen, setPopupOpen] = useState(false);
   const [waUrl, setWaUrl] = useState('');
 
   const set = (key) => (e) => setFormData(prev => ({ ...prev, [key]: e.target.value }));
 
-  const handleSubmit = async (e) => {
+  useEffect(() => {
+    const handleSelectService = (e) => {
+      let targetService = e.detail;
+      if (targetService === 'Mobile Applications') {
+        targetService = 'Mobile Application';
+      }
+      setFormData(prev => ({ ...prev, service: targetService }));
+      const orderSec = document.getElementById('order');
+      if (orderSec) {
+        orderSec.scrollIntoView({ behavior: 'smooth' });
+      }
+    };
+    window.addEventListener('select-service', handleSelectService);
+    return () => window.removeEventListener('select-service', handleSelectService);
+  }, []);
+
+  const handleSubmit = (e) => {
     e.preventDefault();
-    if (status === 'success') return;
-    setStatus('loading');
+    if (popupOpen) return;
 
-    try {
-      // 1. Send email via EmailJS
-      await sendOrderEmail(formData);
+    // ── Step 1: Build WA URL & store it ──
+    const snapshot = { ...formData };
+    const waMsg = buildOrderWAMessage(snapshot);
+    const encoded = encodeURIComponent(waMsg);
+    const url = `https://wa.me/${WA_NUMBER}?text=${encoded}`;
+    setWaUrl(url);
 
-      // 2. Build WhatsApp message and URL
-      const waMsg = buildOrderWAMessage(formData);
-      const encoded = encodeURIComponent(waMsg);
-      const url = `https://wa.me/${WA_NUMBER}?text=${encoded}`;
-      setWaUrl(url);
+    // ── Step 2: Show popup immediately & pulse effect ──
+    setPopupOpen(true);
+    setPulseActive(true);
+    setTimeout(() => setPulseActive(false), 1500);
+    setFormData(INITIAL);
 
-      // 3. Trigger success UI
-      setStatus('success');
-      setPulseActive(true);
-      setTimeout(() => setPulseActive(false), 1500);
-
-      // 4. Auto-open WhatsApp after brief delay (so user sees success first)
-      setTimeout(() => {
-        openWhatsApp(waMsg);
-      }, 800);
-
-      setFormData(INITIAL);
-      setTimeout(() => {
-        setStatus('idle');
-        setWaUrl('');
-      }, 10000); // Keep success state and WhatsApp link active for 10 seconds
-    } catch (err) {
-      console.error('EmailJS error:', err);
-      setStatus('error');
-      setTimeout(() => setStatus('idle'), 5000);
+    // ── Step 3: Send email & DB in background (non-blocking) ──
+    sendOrderEmail(snapshot).catch(err => console.warn('Email send failed:', err));
+    const apiUrl = import.meta.env.VITE_API_URL;
+    if (apiUrl) {
+      fetch(`${apiUrl}/api/orders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(snapshot),
+      }).catch(err => console.warn('Backend sync error:', err));
     }
   };
 
@@ -69,7 +78,8 @@ const OrderForm = () => {
   };
 
   return (
-    <section id="order" style={{ position: 'relative', zIndex: 2 }}>
+    <>
+      <section id="order" style={{ position: 'relative', zIndex: 2 }}>
       {/* Pulse explosion overlay */}
       {pulseActive && (
         <div style={{
@@ -231,88 +241,30 @@ const OrderForm = () => {
                 style={{ ...inputStyle, resize: 'none' }} className="terminal-input" />
             </div>
 
-            {/* Submit button / WhatsApp Link Fallback */}
+            {/* Submit button */}
             <MagneticCard
               tiltStrength={5}
               scaleHover={1.02}
               zDepth={8}
-              glowColor={status === 'success' ? '#25d366' : '#6366f1'}
-              data-cursor-color={status === 'success' ? '#25d366' : '#6366f1'}
+              glowColor="#6366f1"
+              data-cursor-color="#6366f1"
               style={{ width: '100%', display: 'block' }}
             >
-              {status === 'success' ? (
-                <a
-                  href={waUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="launch-btn"
-                  style={{
-                    width: '100%', padding: '16px',
-                    background: 'linear-gradient(135deg, #06ffa5, #25d366)',
-                    borderRadius: '12px', fontWeight: '700', fontSize: '1rem',
-                    color: '#000',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-                    transition: 'all 0.3s ease',
-                    boxShadow: '0 8px 30px rgba(37,211,102,0.4)',
-                    textDecoration: 'none',
-                    boxSizing: 'border-box',
-                  }}
-                >
-                  <MessageCircle size={18} />
-                  <span>Open WhatsApp Chat</span>
-                </a>
-              ) : (
-                <button type="submit" disabled={status === 'loading'} className="launch-btn" style={{
-                  width: '100%', padding: '16px',
-                  background: status === 'error'
-                    ? 'linear-gradient(135deg, #ff006e, #ff4444)'
-                    : 'linear-gradient(135deg, #6366f1, #a855f7)',
-                  borderRadius: '12px', fontWeight: '700', fontSize: '1rem',
-                  color: 'white',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-                  transition: 'all 0.3s ease',
-                  boxShadow: status === 'loading' ? 'none' : '0 8px 30px rgba(99,102,241,0.45)',
-                  opacity: status === 'loading' ? 0.8 : 1,
-                  cursor: status === 'loading' ? 'not-allowed' : 'pointer',
-                  border: 'none',
-                }}>
-                  {status === 'loading' && <Loader size={18} style={{ animation: 'spin 1s linear infinite' }} />}
-                  {status === 'error' && <Send size={18} />}
-                  {status === 'idle' && <Send size={18} />}
-                  <span>
-                    {status === 'loading' ? 'Transmitting...'
-                      : status === 'error' ? '✗ Failed — Try Again'
-                      : 'Launch Mission'}
-                  </span>
-                </button>
-              )}
+              <button type="submit" className="launch-btn" style={{
+                width: '100%', padding: '16px',
+                background: 'linear-gradient(135deg, #6366f1, #a855f7)',
+                borderRadius: '12px', fontWeight: '700', fontSize: '1rem',
+                color: 'white',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+                transition: 'all 0.3s ease',
+                boxShadow: '0 8px 30px rgba(99,102,241,0.45)',
+                cursor: 'pointer',
+                border: 'none',
+              }}>
+                <Send size={18} />
+                <span>Launch Mission</span>
+              </button>
             </MagneticCard>
-
-            {/* Success note */}
-            {status === 'success' && (
-              <div style={{
-                marginTop: '14px', padding: '12px 16px',
-                background: 'rgba(37,211,102,0.1)', border: '1px solid rgba(37,211,102,0.3)',
-                borderRadius: '10px', fontSize: '0.82rem', color: '#25d366',
-                display: 'flex', alignItems: 'center', gap: '8px',
-                animation: 'fadeInUp 0.3s ease',
-              }}>
-                <MessageCircle size={15} />
-                WhatsApp is opening! If it didn't open automatically, tap the button above.
-              </div>
-            )}
-
-            {/* Error note */}
-            {status === 'error' && (
-              <div style={{
-                marginTop: '12px', padding: '12px 16px',
-                background: 'rgba(255,0,110,0.1)', border: '1px solid rgba(255,0,110,0.3)',
-                borderRadius: '10px', fontSize: '0.82rem', color: '#ff006e',
-                animation: 'fadeInUp 0.3s ease',
-              }}>
-                ✗ Email failed. Please check your Web3Forms key in .env and restart the server.
-              </div>
-            )}
 
             {/* Grid overlay */}
             <div style={{
@@ -368,6 +320,17 @@ const OrderForm = () => {
         }
       `}</style>
     </section>
+
+      {/* Success Popup */}
+      <SubmissionPopup
+        isOpen={popupOpen}
+        onClose={() => setPopupOpen(false)}
+        waUrl={waUrl}
+        title="Order Received! 🚀"
+        subtitle="Your order has been submitted. We'll be in touch soon. Click below to continue the conversation on WhatsApp."
+        countdownSec={4}
+      />
+    </>
   );
 };
 

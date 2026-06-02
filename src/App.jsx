@@ -3,6 +3,7 @@ import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import Services from './components/Services';
 import Portfolio from './components/Portfolio';
+import Reviews from './components/Reviews';
 import OrderForm from './components/OrderForm';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
@@ -10,7 +11,8 @@ import { PhysicsProvider } from './context/PhysicsContext';
 import CursorFX from './components/motion/CursorFX';
 import MagneticCard from './components/motion/MagneticCard';
 import { MessageCircle } from 'lucide-react';
-import { openWhatsApp } from './config/emailjs';
+
+const WA_URL = `https://wa.me/923708316591?text=${encodeURIComponent("Hello Webify Pro! I'd like to start a project with you.")}`;
 
 // Lazy-load the heavy 3D scene
 const SpaceScene = lazy(() => import('./components/three/SpaceScene'));
@@ -42,7 +44,7 @@ function App() {
             data-cursor-color="#25d366"
           >
             <div
-              onClick={() => openWhatsApp("Hello Webify Pro! I'd like to start a project with you.")}
+              onClick={() => window.open(WA_URL, '_blank')}
               style={{
                 display: 'flex',
                 flexDirection: 'row-reverse',
@@ -87,6 +89,7 @@ function App() {
             <Hero />
             <Services />
             <Portfolio />
+            <Reviews />
             <OrderForm />
             <Contact />
           </main>

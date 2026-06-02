@@ -1,50 +1,43 @@
 import React, { useState } from 'react';
-import { Mail, Phone, MapPin, Send, Zap, MessageCircle, Loader } from 'lucide-react';
-import { sendContactEmail, openWhatsApp, buildContactWAMessage, WA_NUMBER } from '../config/emailjs';
+import { Mail, Phone, MapPin, Send, Zap, MessageCircle } from 'lucide-react';
+import { sendContactEmail, buildContactWAMessage, WA_NUMBER } from '../config/emailjs';
 import ScrollReveal from './motion/ScrollReveal';
 import MagneticCard from './motion/MagneticCard';
+import SubmissionPopup from './SubmissionPopup';
 
 const INITIAL = { name: '', email: '', phone: '', subject: '', message: '' };
 
 const Contact = () => {
   const [formData, setFormData] = useState(INITIAL);
-  const [status, setStatus] = useState('idle'); // idle | loading | success | error
+  const [popupOpen, setPopupOpen] = useState(false);
   const [waUrl, setWaUrl] = useState('');
 
   const set = (key) => (e) => setFormData(prev => ({ ...prev, [key]: e.target.value }));
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    if (status === 'success') return;
-    setStatus('loading');
+    if (popupOpen) return;
 
-    try {
-      // 1. Send email via EmailJS
-      await sendContactEmail(formData);
+    // ── Step 1: Build WA URL ──
+    const snapshot = { ...formData };
+    const waMsg = buildContactWAMessage(snapshot);
+    const encoded = encodeURIComponent(waMsg);
+    const url = `https://wa.me/${WA_NUMBER}?text=${encoded}`;
+    setWaUrl(url);
 
-      // 2. Build WhatsApp message and URL
-      const waMsg = buildContactWAMessage(formData);
-      const encoded = encodeURIComponent(waMsg);
-      const url = `https://wa.me/${WA_NUMBER}?text=${encoded}`;
-      setWaUrl(url);
+    // ── Step 2: Show popup immediately ──
+    setPopupOpen(true);
+    setFormData(INITIAL);
 
-      // 3. Success UI
-      setStatus('success');
-
-      // 4. Open WhatsApp after brief delay
-      setTimeout(() => {
-        openWhatsApp(waMsg);
-      }, 800);
-
-      setFormData(INITIAL);
-      setTimeout(() => {
-        setStatus('idle');
-        setWaUrl('');
-      }, 10000); // Keep success state and WhatsApp link active for 10 seconds
-    } catch (err) {
-      console.error('EmailJS error:', err);
-      setStatus('error');
-      setTimeout(() => status === 'loading' && setStatus('idle'), 5000);
+    // ── Step 3: Send email & DB in background (non-blocking) ──
+    sendContactEmail(snapshot).catch(err => console.warn('Email send failed:', err));
+    const apiUrl = import.meta.env.VITE_API_URL;
+    if (apiUrl) {
+      fetch(`${apiUrl}/api/contact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(snapshot),
+      }).catch(err => console.warn('Backend sync error:', err));
     }
   };
 
@@ -72,6 +65,7 @@ const Contact = () => {
   };
 
   return (
+    <>
     <section id="contact" style={{ position: 'relative', zIndex: 2 }}>
       {/* Header */}
       <ScrollReveal direction="up">
@@ -229,88 +223,30 @@ const Contact = () => {
                   style={{ ...inputStyle, resize: 'none' }} className="contact-input" />
               </div>
 
-              {/* Submit / WhatsApp Link Fallback */}
+              {/* Submit button */}
               <MagneticCard
                 tiltStrength={5}
                 scaleHover={1.02}
                 zDepth={8}
-                glowColor={status === 'success' ? '#25d366' : '#00d4ff'}
-                data-cursor-color={status === 'success' ? '#25d366' : '#00d4ff'}
+                glowColor="#00d4ff"
+                data-cursor-color="#00d4ff"
                 style={{ gridColumn: 'span 2', display: 'block', zIndex: 1 }}
               >
-                {status === 'success' ? (
-                  <a
-                    href={waUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="send-btn"
-                    style={{
-                      width: '100%', padding: '16px',
-                      background: 'linear-gradient(135deg, #25d366, #06ffa5)',
-                      borderRadius: '12px', fontWeight: '700', fontSize: '1rem',
-                      color: '#000',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-                      transition: 'all 0.3s ease',
-                      boxShadow: '0 8px 28px rgba(37,211,102,0.4)',
-                      textDecoration: 'none',
-                      boxSizing: 'border-box',
-                    }}
-                  >
-                    <MessageCircle size={18} />
-                    <span>Open WhatsApp Chat</span>
-                  </a>
-                ) : (
-                  <button type="submit" disabled={status === 'loading'} className="send-btn" style={{
-                    width: '100%', padding: '16px',
-                    background: status === 'error'
-                      ? 'linear-gradient(135deg, #ff006e, #ff4444)'
-                      : 'linear-gradient(135deg, #00d4ff, #6366f1)',
-                    borderRadius: '12px', fontWeight: '700', fontSize: '1rem',
-                    color: 'white',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-                    transition: 'all 0.3s ease', cursor: status === 'loading' ? 'not-allowed' : 'pointer',
-                    opacity: status === 'loading' ? 0.8 : 1,
-                    boxShadow: '0 8px 28px rgba(0,212,255,0.3)',
-                    boxSizing: 'border-box',
-                    border: 'none',
-                  }}>
-                    {status === 'loading' && <Loader size={18} style={{ animation: 'spin 1s linear infinite' }} />}
-                    {status === 'idle' && <><Zap size={18} /><Send size={18} /></>}
-                    {status === 'error' && <><Zap size={18} /><Send size={18} /></>}
-                    <span>
-                      {status === 'loading' ? 'Transmitting...'
-                        : status === 'error' ? '✗ Failed — Try Again'
-                        : 'Send Message'}
-                    </span>
-                  </button>
-                )}
+                <button type="submit" className="send-btn" style={{
+                  width: '100%', padding: '16px',
+                  background: 'linear-gradient(135deg, #00d4ff, #6366f1)',
+                  borderRadius: '12px', fontWeight: '700', fontSize: '1rem',
+                  color: 'white',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+                  transition: 'all 0.3s ease', cursor: 'pointer',
+                  boxShadow: '0 8px 28px rgba(0,212,255,0.3)',
+                  boxSizing: 'border-box',
+                  border: 'none',
+                }}>
+                  <Zap size={18} /><Send size={18} />
+                  <span>Send Message</span>
+                </button>
               </MagneticCard>
-
-              {/* Success feedback */}
-              {status === 'success' && (
-                <div style={{
-                  gridColumn: 'span 2', padding: '12px 16px',
-                  background: 'rgba(37,211,102,0.1)', border: '1px solid rgba(37,211,102,0.3)',
-                  borderRadius: '10px', fontSize: '0.82rem', color: '#25d366',
-                  display: 'flex', alignItems: 'center', gap: '8px',
-                  animation: 'fadeInUp 0.3s ease', zIndex: 1,
-                }}>
-                  <MessageCircle size={15} />
-                  Message delivered! WhatsApp is opening! If it didn't open automatically, tap the button above.
-                </div>
-              )}
-
-              {/* Error feedback */}
-              {status === 'error' && (
-                <div style={{
-                  gridColumn: 'span 2', padding: '12px 16px',
-                  background: 'rgba(255,0,110,0.1)', border: '1px solid rgba(255,0,110,0.3)',
-                  borderRadius: '10px', fontSize: '0.82rem', color: '#ff006e',
-                  animation: 'fadeInUp 0.3s ease', zIndex: 1,
-                }}>
-                  ✗ Email failed. Please check your Web3Forms key in .env and restart the server.
-                </div>
-              )}
 
               {/* Grid overlay */}
               <div style={{
@@ -362,6 +298,17 @@ const Contact = () => {
         }
       `}</style>
     </section>
+
+      {/* Success Popup */}
+      <SubmissionPopup
+        isOpen={popupOpen}
+        onClose={() => setPopupOpen(false)}
+        waUrl={waUrl}
+        title="Message Sent! ✨"
+        subtitle="Thanks for reaching out! We'll respond within 2 hours. Click below to continue chatting on WhatsApp."
+        countdownSec={4}
+      />
+    </>
   );
 };
 
