@@ -1,9 +1,49 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ChevronRight, Globe, Zap } from 'lucide-react';
 import gsap from 'gsap';
 import GlitchText from './motion/GlitchText';
 import ParallaxLayer from './motion/ParallaxLayer';
 import MagneticCard from './motion/MagneticCard';
+
+// Animated count-up stat component
+function CountUpStat({ target, suffix, label }) {
+  const [count, setCount] = useState(0);
+  const ref = useRef();
+  const started = useRef(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && !started.current) {
+        started.current = true;
+        const duration = 1600;
+        const steps = 60;
+        const increment = target / steps;
+        let current = 0;
+        const timer = setInterval(() => {
+          current = Math.min(current + increment, target);
+          setCount(Math.round(current));
+          if (current >= target) clearInterval(timer);
+        }, duration / steps);
+      }
+    }, { threshold: 0.3 });
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [target]);
+
+  return (
+    <div ref={ref}>
+      <div className="outfit" style={{
+        fontSize: 'clamp(1.5rem, 4vw, 2rem)', fontWeight: '800',
+        background: 'linear-gradient(135deg, #6366f1, #00d4ff)',
+        backgroundClip: 'text', WebkitBackgroundClip: 'text',
+        WebkitTextFillColor: 'transparent',
+      }}>
+        {count}{suffix}
+      </div>
+      <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)', marginTop: '2px' }}>{label}</div>
+    </div>
+  );
+}
 
 const Hero = () => {
   const headRef = useRef();
@@ -33,7 +73,7 @@ const Hero = () => {
       <div style={{ maxWidth: '720px', width: '100%', position: 'relative', zIndex: 2 }}>
         <ParallaxLayer depth={3}>
           {/* Badge */}
-          <div ref={badgeRef} style={{
+          <div ref={badgeRef} className="hero-badge" style={{
             display: 'inline-flex', alignItems: 'center', gap: '10px',
             padding: '8px 18px', borderRadius: '100px',
             background: 'rgba(99,102,241,0.1)',
@@ -69,7 +109,7 @@ const Hero = () => {
           </h1>
 
           {/* Subtext */}
-          <p ref={subRef} style={{
+          <p ref={subRef} className="hero-sub" style={{
             fontSize: 'clamp(0.95rem, 2vw, 1.15rem)',
             color: 'rgba(255,255,255,0.78)',
             marginBottom: '40px', maxWidth: '560px', lineHeight: '1.75', opacity: 0,
@@ -114,26 +154,18 @@ const Hero = () => {
           </div>
         </ParallaxLayer>
 
-        {/* Stats */}
+        {/* Stats with animated counters */}
         <ParallaxLayer depth={5}>
           <div ref={statsRef} className="hero-stats" style={{
             display: 'flex', gap: '40px', marginTop: '56px',
             flexWrap: 'wrap', opacity: 0,
           }}>
             {[
-              { value: '50+', label: 'Projects Launched' },
-              { value: '100%', label: 'Client Satisfaction' },
-              { value: '24/7', label: 'Support Available' },
+              { target: 50, suffix: '+', label: 'Projects Launched' },
+              { target: 100, suffix: '%', label: 'Client Satisfaction' },
+              { target: 24, suffix: '/7', label: 'Support Available' },
             ].map(stat => (
-              <div key={stat.label}>
-                <div className="outfit" style={{
-                  fontSize: 'clamp(1.5rem, 4vw, 2rem)', fontWeight: '800',
-                  background: 'linear-gradient(135deg, #6366f1, #00d4ff)',
-                  backgroundClip: 'text', WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                }}>{stat.value}</div>
-                <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)', marginTop: '2px' }}>{stat.label}</div>
-              </div>
+              <CountUpStat key={stat.label} target={stat.target} suffix={stat.suffix} label={stat.label} />
             ))}
           </div>
         </ParallaxLayer>

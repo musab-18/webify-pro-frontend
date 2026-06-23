@@ -209,70 +209,73 @@ const SubmissionPopup = ({
         </div>
 
         {/* Title */}
-        <h2 style={{
-          fontSize: '1.7rem', fontWeight: '800',
-          fontFamily: 'Outfit, sans-serif',
+        <h2 className="popup-title" style={{
+          fontWeight: '800', fontFamily: 'Outfit, sans-serif',
           color: '#fff', marginBottom: '10px', lineHeight: '1.2',
         }}>
           {title}
         </h2>
 
         {/* Subtitle */}
-        <p style={{
-          color: 'rgba(255,255,255,0.55)',
-          fontSize: '0.92rem', lineHeight: '1.65',
-          marginBottom: '28px', maxWidth: '340px', margin: '0 auto 28px',
+        <p className="popup-subtitle" style={{
+          color: 'rgba(255,255,255,0.55)', lineHeight: '1.65',
+          margin: '0 auto 24px', maxWidth: '340px'
         }}>
           {subtitle}
         </p>
 
         {/* Info row */}
         <div style={{
-          display: 'flex', gap: '10px', justifyContent: 'center',
-          marginBottom: '28px', flexWrap: 'wrap',
+          display: 'flex', gap: '8px', justifyContent: 'center',
+          marginBottom: '24px', flexWrap: 'wrap',
         }}>
           {[
             { icon: '📧', label: 'Email sent', color: '#00d4ff' },
             { icon: '⚡', label: 'Response < 2h', color: '#06ffa5' },
           ].map(item => (
-            <div key={item.label} style={{
+            <div key={item.label} className="popup-badge" style={{
               display: 'flex', alignItems: 'center', gap: '6px',
-              padding: '6px 14px', borderRadius: '100px',
-              background: `${item.color}11`,
+              borderRadius: '100px', background: `${item.color}11`,
               border: `1px solid ${item.color}30`,
-              fontSize: '0.78rem', color: item.color, fontWeight: '600',
+              color: item.color, fontWeight: '600',
             }}>
               <span>{item.icon}</span><span>{item.label}</span>
             </div>
           ))}
         </div>
 
-        {/* WhatsApp CTA button */}
+        {/* Beautiful Countdown Timer */}
+        <div className="popup-timer-box" style={{
+          background: 'rgba(37,211,102,0.08)', border: '1px solid rgba(37,211,102,0.25)',
+          borderRadius: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
+          animation: 'pulseBg 2s infinite alternate'
+        }}>
+          <div className="popup-timer-label" style={{ color: '#06ffa5', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            Auto-Redirecting to WhatsApp
+          </div>
+          <div className="popup-timer-value" style={{
+            fontWeight: '900', color: '#fff', lineHeight: '1',
+            fontFamily: 'Outfit, sans-serif', textShadow: '0 0 20px rgba(37,211,102,0.5)'
+          }}>
+            00:0{countdown}
+          </div>
+        </div>
+
+        {/* Manual WhatsApp CTA button */}
         <button
           onClick={handleWhatsApp}
           className="popup-wa-btn"
           style={{
-            width: '100%', padding: '16px 24px',
-            background: 'linear-gradient(135deg, #25d366, #06ffa5)',
-            border: 'none', borderRadius: '14px',
-            fontWeight: '800', fontSize: '1rem', color: '#000',
+            width: '100%',
+            background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: '12px', fontWeight: '700', color: '#fff',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-            cursor: 'pointer', marginBottom: '12px',
-            boxShadow: '0 8px 32px rgba(37,211,102,0.4)',
-            transition: 'all 0.3s ease',
+            cursor: 'pointer', transition: 'all 0.3s ease',
             fontFamily: 'Outfit, sans-serif',
-            letterSpacing: '0.01em',
           }}
         >
-          <MessageCircle size={20} />
-          Open WhatsApp Chat
-          <span style={{
-            fontSize: '0.75rem', fontWeight: '600',
-            background: 'rgba(0,0,0,0.2)', padding: '2px 8px',
-            borderRadius: '100px', marginLeft: '4px',
-          }}>
-            auto in {countdown}s
-          </span>
+          <MessageCircle size={18} color="#25d366" />
+          Open Manually Now
         </button>
 
         {/* Dismiss link */}
@@ -328,8 +331,13 @@ const SubmissionPopup = ({
           from { transform: rotate(0deg); }
           to   { transform: rotate(360deg); }
         }
+        @keyframes pulseBg {
+          from { background: rgba(37,211,102,0.02); box-shadow: 0 0 0 rgba(37,211,102,0); }
+          to   { background: rgba(37,211,102,0.12); box-shadow: 0 0 20px rgba(37,211,102,0.2); }
+        }
         .popup-wa-btn:hover {
-          box-shadow: 0 12px 40px rgba(37,211,102,0.55) !important;
+          background: rgba(255,255,255,0.1) !important;
+          border-color: rgba(37,211,102,0.5) !important;
           transform: translateY(-2px) !important;
         }
         .popup-close-btn:hover {
@@ -338,6 +346,26 @@ const SubmissionPopup = ({
         }
         .popup-dismiss-btn:hover {
           color: rgba(255,255,255,0.6) !important;
+        }
+
+        /* Default (Desktop) */
+        .popup-title { font-size: 1.7rem; }
+        .popup-subtitle { font-size: 0.92rem; }
+        .popup-badge { padding: 6px 14px; font-size: 0.78rem; }
+        .popup-timer-box { padding: 16px; margin-top: 10px; margin-bottom: 20px; }
+        .popup-timer-label { font-size: 0.82rem; }
+        .popup-timer-value { font-size: 3.2rem; }
+        .popup-wa-btn { padding: 14px 24px; font-size: 0.95rem; margin-bottom: 12px; }
+
+        /* Mobile Responsive */
+        @media (max-width: 480px) {
+          .popup-title { font-size: 1.4rem !important; }
+          .popup-subtitle { font-size: 0.85rem !important; margin-bottom: 16px !important; }
+          .popup-badge { padding: 4px 10px !important; font-size: 0.7rem !important; }
+          .popup-timer-box { padding: 12px !important; margin-top: 4px !important; margin-bottom: 16px !important; border-radius: 12px !important; }
+          .popup-timer-label { font-size: 0.7rem !important; }
+          .popup-timer-value { font-size: 2.6rem !important; }
+          .popup-wa-btn { padding: 12px 18px !important; font-size: 0.85rem !important; }
         }
       `}</style>
     </>

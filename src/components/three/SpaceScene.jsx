@@ -1,4 +1,4 @@
-import React, { Suspense, useRef } from 'react';
+import React, { Suspense, useEffect, useRef, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { EffectComposer, Bloom, Vignette, DepthOfField } from '@react-three/postprocessing';
 import ParticleField from './ParticleField';
@@ -10,60 +10,32 @@ import { useMobile } from '../../hooks/useMobile';
 
 const lerp = (a, b, t) => a + (b - a) * t;
 
-/**
- * Cinematic camera — floating drone physics
- *  - Mouse → smooth lag drift (lerp 0.05)
- *  - Scroll → Z-travel (fly through scene)
- *  - Fast horizontal mouse → Z-axis roll (banking like a drone)
- *  - Fast scroll → micro shake on Y
- *  - lookAt always targets (0,0,0)
- */
 function CinematicCamera() {
   const { camera } = useThree();
   const { scrollProgress } = useScrollProgress();
-
-  // Smooth values
   const smooth = useRef({ x: 0, y: 0, z: 8, roll: 0 });
-  // Velocity for cinematic banking
   const mouseVel = useRef({ x: 0, prevX: 0 });
-  const shakeY = useRef(0);
 
   useFrame((state, delta) => {
     const t = state.clock.elapsedTime;
-
-    // Mouse position (normalized -0.5 to 0.5) from R3F pointer
     const mx = state.pointer.x * 0.5;
     const my = state.pointer.y * 0.3;
-
-    // Mouse horizontal velocity for roll
     mouseVel.current.x = mx - mouseVel.current.prevX;
     mouseVel.current.prevX = mx;
-
     const s = smooth.current;
-
-    // Drift
     s.x = lerp(s.x, mx, 0.04);
     s.y = lerp(s.y, my, 0.04);
-
-    // Z-travel on scroll — fly through the galaxy
     const targetZ = 8 - scrollProgress * 14;
     s.z = lerp(s.z, targetZ, 0.035);
-
-    // Cinematic roll — bank slightly on fast horizontal movement
     const rollTarget = -mouseVel.current.x * 3.5;
     s.roll = lerp(s.roll, rollTarget, 0.06);
-
-    // Subtle Y breathe (drone hover simulation)
     const breathe = Math.sin(t * 0.4) * 0.06;
-
     camera.position.x = s.x;
     camera.position.y = s.y + breathe;
     camera.position.z = s.z;
     camera.rotation.z = s.roll;
-
     camera.lookAt(0, 0, 0);
   });
-
   return null;
 }
 
@@ -78,6 +50,21 @@ function LoadingFallback() {
 
 export default function SpaceScene() {
   const isMobile = useMobile();
+  const [isLight, setIsLight] = useState(
+    () => document.documentElement.classList.contains('light-mode')
+  );
+
+  // Watch for light-mode class changes
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsLight(document.documentElement.classList.contains('light-mode'));
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
+  }, []);
+
+  // In light mode, hide the 3D canvas entirely — the CSS background handles it
+  if (isLight) return null;
 
   return (
     <Canvas
@@ -113,17 +100,8 @@ export default function SpaceScene() {
 
       {!isMobile && (
         <EffectComposer>
-          <Bloom
-            intensity={2.0}
-            luminanceThreshold={0.18}
-            luminanceSmoothing={0.85}
-            mipmapBlur
-          />
-          <DepthOfField
-            focusDistance={0.008}
-            focalLength={0.22}
-            bokehScale={3.5}
-          />
+          <Bloom intensity={2.0} luminanceThreshold={0.18} luminanceSmoothing={0.85} mipmapBlur />
+          <DepthOfField focusDistance={0.008} focalLength={0.22} bokehScale={3.5} />
           <Vignette eskil={false} offset={0.08} darkness={0.75} />
         </EffectComposer>
       )}

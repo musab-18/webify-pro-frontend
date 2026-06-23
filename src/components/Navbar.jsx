@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, Rocket } from 'lucide-react';
+import { Menu, X, Rocket, Sun, Moon } from 'lucide-react';
 import MagneticCard from './motion/MagneticCard';
 import { useScrollProgress } from '../hooks/useScrollProgress';
 
@@ -8,6 +8,25 @@ const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
+  const [isDark, setIsDark] = useState(() => {
+    // Default: light. Only go dark if user explicitly chose dark.
+    return localStorage.getItem('webify_theme') === 'dark';
+  });
+
+  // Apply theme class on change
+  useEffect(() => {
+    const html = document.documentElement;
+    html.classList.add('theme-switching');
+    if (isDark) {
+      html.classList.remove('light-mode');
+      localStorage.setItem('webify_theme', 'dark');
+    } else {
+      html.classList.add('light-mode');
+      localStorage.setItem('webify_theme', 'light');
+    }
+    const t = setTimeout(() => html.classList.remove('theme-switching'), 500);
+    return () => clearTimeout(t);
+  }, [isDark]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -169,27 +188,42 @@ const Navbar = () => {
           </li>
         </ul>
 
-        {/* Mobile hamburger — always rendered, shown/hidden via CSS only */}
-        <div
-          className="mobile-menu-btn"
-          onClick={() => setIsMenuOpen(true)}
-          style={{
-            cursor: 'pointer',
-            zIndex: 101,
-            display: 'none',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '44px',
-            height: '44px',
-            borderRadius: '10px',
-            background: 'rgba(99,102,241,0.18)',
-            border: '1px solid rgba(99,102,241,0.4)',
-            color: '#ffffff',
-            boxShadow: '0 0 14px rgba(99,102,241,0.3)',
-          }}
-        >
-          <Menu size={26} strokeWidth={2.5} />
-        </div>
+          {/* Theme toggle + hamburger wrapper */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {/* Dark / Light toggle */}
+            <button
+              onClick={() => setIsDark(d => !d)}
+              aria-label="Toggle theme"
+              id="theme-toggle-btn"
+              style={{
+                width: '40px', height: '40px', borderRadius: '10px',
+                background: 'rgba(99,102,241,0.12)',
+                border: '1px solid rgba(99,102,241,0.3)',
+                color: isDark ? '#f59e0b' : '#6366f1',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                cursor: 'pointer', transition: 'all 0.3s ease',
+                boxShadow: '0 0 10px rgba(99,102,241,0.2)',
+              }}
+              className="theme-toggle-btn"
+            >
+              {isDark ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
+
+            {/* Mobile hamburger */}
+            <div
+              className="mobile-menu-btn"
+              onClick={() => setIsMenuOpen(true)}
+              style={{
+                cursor: 'pointer', zIndex: 101,
+                display: 'none', alignItems: 'center', justifyContent: 'center',
+                width: '44px', height: '44px', borderRadius: '10px',
+                background: 'rgba(99,102,241,0.18)', border: '1px solid rgba(99,102,241,0.4)',
+                color: '#ffffff', boxShadow: '0 0 14px rgba(99,102,241,0.3)',
+              }}
+            >
+              <Menu size={26} strokeWidth={2.5} />
+            </div>
+          </div>
 
         {/* Scroll Progress Bar */}
         <div

@@ -1,4 +1,4 @@
-import { Rocket, Github, Linkedin, Facebook, Mail, MessageCircle, ChevronRight } from 'lucide-react';
+import { Rocket, Github, Linkedin, Facebook, Mail, MessageCircle, ChevronRight, ShieldCheck, Lock, Star } from 'lucide-react';
 
 const Footer = () => (
   <footer style={{
@@ -108,6 +108,36 @@ const Footer = () => (
           ))}
         </ul>
       </div>
+    </div>
+
+
+    {/* Trust Badges */}
+    <div style={{
+      borderTop: '1px solid rgba(255,255,255,0.06)',
+      paddingTop: '24px',
+      marginBottom: '20px',
+      display: 'flex',
+      justifyContent: 'center',
+      gap: '20px',
+      flexWrap: 'wrap',
+    }}>
+      {[
+        { icon: <ShieldCheck size={14} />, label: 'SSL Secured', color: '#06ffa5' },
+        { icon: <Lock size={14} />,        label: 'GDPR Compliant', color: '#00d4ff' },
+        { icon: <Star size={14} />,        label: '5-Star Rated',   color: '#f59e0b' },
+      ].map(badge => (
+        <div key={badge.label} style={{
+          display: 'inline-flex', alignItems: 'center', gap: '6px',
+          padding: '6px 14px', borderRadius: '100px',
+          background: `${badge.color}0c`,
+          border: `1px solid ${badge.color}25`,
+          color: badge.color, fontSize: '0.75rem', fontWeight: '700',
+          fontFamily: 'Outfit, sans-serif',
+        }}>
+          {badge.icon}
+          {badge.label}
+        </div>
+      ))}
     </div>
 
     {/* Bottom bar */}

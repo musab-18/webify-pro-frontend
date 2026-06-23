@@ -39,6 +39,14 @@ export default function ScrollReveal({
     const from = { ...PRESETS[direction] };
     const to = { y: 0, x: 0, z: 0, scale: 1, rotateX: 0, rotateY: 0, opacity: 1 };
 
+    // Strip out heavy 3D transforms on mobile to ensure buttery smooth scrolling
+    const isMobile = window.innerWidth <= 768;
+    if (isMobile) {
+      if (from.z) delete from.z;
+      if (from.rotateX) delete from.rotateX;
+      if (from.rotateY) delete from.rotateY;
+    }
+
     const targets = stagger > 0 ? el.children : el;
 
     const tween = gsap.fromTo(

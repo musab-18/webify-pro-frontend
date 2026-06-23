@@ -11,34 +11,45 @@ const Contact = () => {
   const [formData, setFormData] = useState(INITIAL);
   const [popupOpen, setPopupOpen] = useState(false);
   const [waUrl, setWaUrl] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loadingText, setLoadingText] = useState('');
 
   const set = (key) => (e) => setFormData(prev => ({ ...prev, [key]: e.target.value }));
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (popupOpen) return;
+    if (popupOpen || isSubmitting) return;
 
-    // ── Step 1: Build WA URL ──
-    const snapshot = { ...formData };
-    const waMsg = buildContactWAMessage(snapshot);
-    const encoded = encodeURIComponent(waMsg);
-    const url = `https://wa.me/${WA_NUMBER}?text=${encoded}`;
-    setWaUrl(url);
+    setIsSubmitting(true);
+    setLoadingText('Authenticating...');
+    
+    setTimeout(() => setLoadingText('Encrypting transmission...'), 600);
+    setTimeout(() => setLoadingText('Routing through quantum relays...'), 1200);
 
-    // ── Step 2: Show popup immediately ──
-    setPopupOpen(true);
-    setFormData(INITIAL);
+    setTimeout(() => {
+      // ── Step 1: Build WA URL ──
+      const snapshot = { ...formData };
+      const waMsg = buildContactWAMessage(snapshot);
+      const encoded = encodeURIComponent(waMsg);
+      const url = `https://wa.me/${WA_NUMBER}?text=${encoded}`;
+      setWaUrl(url);
 
-    // ── Step 3: Send email & DB in background (non-blocking) ──
-    sendContactEmail(snapshot).catch(err => console.warn('Email send failed:', err));
-    const apiUrl = import.meta.env.VITE_API_URL;
-    if (apiUrl) {
-      fetch(`${apiUrl}/api/contact`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(snapshot),
-      }).catch(err => console.warn('Backend sync error:', err));
-    }
+      // ── Step 2: Show popup immediately ──
+      setPopupOpen(true);
+      setFormData(INITIAL);
+      setIsSubmitting(false);
+
+      // ── Step 3: Send email & DB in background (non-blocking) ──
+      sendContactEmail(snapshot).catch(err => console.warn('Email send failed:', err));
+      const apiUrl = import.meta.env.VITE_API_URL;
+      if (apiUrl) {
+        fetch(`${apiUrl}/api/contact`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(snapshot),
+        }).catch(err => console.warn('Backend sync error:', err));
+      }
+    }, 2000);
   };
 
   const contactInfo = [
@@ -232,20 +243,42 @@ const Contact = () => {
                 data-cursor-color="#00d4ff"
                 style={{ gridColumn: 'span 2', display: 'block', zIndex: 1 }}
               >
-                <button type="submit" className="send-btn" style={{
-                  width: '100%', padding: '16px',
-                  background: 'linear-gradient(135deg, #00d4ff, #6366f1)',
-                  borderRadius: '12px', fontWeight: '700', fontSize: '1rem',
-                  color: 'white',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-                  transition: 'all 0.3s ease', cursor: 'pointer',
-                  boxShadow: '0 8px 28px rgba(0,212,255,0.3)',
-                  boxSizing: 'border-box',
-                  border: 'none',
-                }}>
-                  <Zap size={18} /><Send size={18} />
-                  <span>Send Message</span>
-                </button>
+                <button
+              type="submit"
+              disabled={isSubmitting}
+              className="contact-submit-btn"
+              style={{
+                width: '100%', padding: '16px',
+                background: isSubmitting ? 'rgba(255,255,255,0.05)' : 'linear-gradient(135deg, #00d4ff, #6366f1)',
+                border: isSubmitting ? '1px solid rgba(0,212,255,0.3)' : 'none',
+                borderRadius: '10px', color: isSubmitting ? '#00d4ff' : '#000',
+                fontWeight: '800', fontSize: '1.05rem', cursor: isSubmitting ? 'default' : 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+                transition: 'all 0.3s ease', fontFamily: 'Outfit, sans-serif',
+                position: 'relative', overflow: 'hidden'
+              }}
+            >
+              {isSubmitting && (
+                <div style={{
+                  position: 'absolute', top: 0, left: 0, bottom: 0,
+                  width: '30%', background: 'linear-gradient(90deg, transparent, rgba(0,212,255,0.2), transparent)',
+                  animation: 'loadingSweep 1s infinite linear',
+                }} />
+              )}
+              
+              {isSubmitting ? (
+                <>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ animation: 'spinRing 1s linear infinite' }}>
+                    <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                  </svg>
+                  <span style={{ fontFamily: 'monospace', letterSpacing: '0.05em' }}>{loadingText}</span>
+                </>
+              ) : (
+                <>
+                  <Send size={18} /> Send Transmission <Zap size={16} />
+                </>
+              )}
+            </button>
               </MagneticCard>
 
               {/* Grid overlay */}
@@ -272,12 +305,17 @@ const Contact = () => {
         .contact-info-card:hover {
           background: rgba(10,10,30,0.92) !important;
         }
-        .send-btn:hover:not(:disabled) {
-          box-shadow: 0 16px 40px rgba(0,212,255,0.4) !important;
+        .contact-submit-btn:not(:disabled):hover {
+          box-shadow: 0 8px 26px rgba(0,212,255,0.4) !important;
+          transform: translateY(-2px);
         }
-        @keyframes spin {
+        @keyframes spinRing {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
+        }
+        @keyframes loadingSweep {
+          0% { left: -30%; }
+          100% { left: 100%; }
         }
         @keyframes fadeInUp {
           from { opacity: 0; transform: translateY(6px); }
