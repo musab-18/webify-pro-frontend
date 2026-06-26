@@ -53,7 +53,8 @@ const services = [
       'Push Notifications & App Settings',
       'App Store & Play Store Submissions',
       'Custom REST API & Web Server Integrations'
-    ]
+    ],
+    soon: true
   },
   {
     icon: <Cpu size={26} />,

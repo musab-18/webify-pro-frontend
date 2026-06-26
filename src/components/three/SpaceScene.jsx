@@ -1,18 +1,16 @@
 import React, { Suspense, useEffect, useRef, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { EffectComposer, Bloom, Vignette, DepthOfField } from '@react-three/postprocessing';
 import ParticleField from './ParticleField';
 import AIPlanet from './AIPlanet';
 import ServiceOrbs from './ServiceOrbs';
 import ProjectCards3D from './ProjectCards3D';
-import { useScrollProgress } from '../../hooks/useScrollProgress';
+
 import { useMobile } from '../../hooks/useMobile';
 
 const lerp = (a, b, t) => a + (b - a) * t;
 
 function CinematicCamera() {
   const { camera } = useThree();
-  const { scrollProgress } = useScrollProgress();
   const smooth = useRef({ x: 0, y: 0, z: 8, roll: 0 });
   const mouseVel = useRef({ x: 0, prevX: 0 });
 
@@ -22,6 +20,11 @@ function CinematicCamera() {
     const my = state.pointer.y * 0.3;
     mouseVel.current.x = mx - mouseVel.current.prevX;
     mouseVel.current.prevX = mx;
+    
+    const sy = window.scrollY;
+    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+    const scrollProgress = maxScroll > 0 ? sy / maxScroll : 0;
+
     const s = smooth.current;
     s.x = lerp(s.x, mx, 0.04);
     s.y = lerp(s.y, my, 0.04);
@@ -97,14 +100,6 @@ export default function SpaceScene() {
         <ServiceOrbs />
         <ProjectCards3D />
       </Suspense>
-
-      {!isMobile && (
-        <EffectComposer>
-          <Bloom intensity={2.0} luminanceThreshold={0.18} luminanceSmoothing={0.85} mipmapBlur />
-          <DepthOfField focusDistance={0.008} focalLength={0.22} bokehScale={3.5} />
-          <Vignette eskil={false} offset={0.08} darkness={0.75} />
-        </EffectComposer>
-      )}
     </Canvas>
   );
 }
