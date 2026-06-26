@@ -90,7 +90,7 @@ const OrderWizard = ({ onSuccess }) => {
     setStep(0);
     setIsSubmitting(false);
 
-    sendOrderEmail(snapshot).catch(err => console.warn('Email fail:', err));
+    // Web3Forms removed since backend handles emails now
     const apiUrl = import.meta.env.VITE_API_URL;
     if (apiUrl) {
       fetch(`${apiUrl}/api/orders`, {

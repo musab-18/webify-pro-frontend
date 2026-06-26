@@ -35,7 +35,7 @@ const Contact = () => {
     setIsSubmitting(false);
 
     // ── Step 3: Send email & DB in background (non-blocking) ──
-    sendContactEmail(snapshot).catch(err => console.warn('Email send failed:', err));
+    // Web3Forms removed since backend handles emails now
     const apiUrl = import.meta.env.VITE_API_URL;
     if (apiUrl) {
       fetch(`${apiUrl}/api/contact`, {
