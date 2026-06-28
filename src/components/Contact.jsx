@@ -36,14 +36,12 @@ const Contact = () => {
 
     // ── Step 3: Send email & DB in background (non-blocking) ──
     // Web3Forms removed since backend handles emails now
-    const apiUrl = import.meta.env.VITE_API_URL;
-    if (apiUrl) {
-      fetch(`${apiUrl}/api/contact`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(snapshot),
-      }).catch(err => console.warn('Backend sync error:', err));
-    }
+    const apiUrl = import.meta.env.VITE_API_URL || '';
+    fetch(`${apiUrl}/api/contact`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(snapshot),
+    }).catch(err => console.warn('Backend sync error:', err));
   };
 
   const contactInfo = [

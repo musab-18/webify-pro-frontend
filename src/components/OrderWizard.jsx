@@ -91,14 +91,12 @@ const OrderWizard = ({ onSuccess }) => {
     setIsSubmitting(false);
 
     // Web3Forms removed since backend handles emails now
-    const apiUrl = import.meta.env.VITE_API_URL;
-    if (apiUrl) {
-      fetch(`${apiUrl}/api/orders`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(snapshot),
-      }).catch(() => { });
-    }
+    const apiUrl = import.meta.env.VITE_API_URL || '';
+    fetch(`${apiUrl}/api/orders`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(snapshot),
+    }).catch(() => { });
     if (onSuccess) onSuccess();
   };
 
